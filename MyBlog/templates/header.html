@@ -1,0 +1,45 @@
+{% load staticfiles %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.js' %}"></script>
+<div class="container">
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+            <a href="#" class="navbar-brand">
+                <img src="{% static '/images/ying.jpg' %}" width="100px"/>
+            </a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav navbar-left" role="navigation">
+                <li><a href="{% url 'home' %}">首页</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'blog:blog_title' %}">博客</a></li>
+                {% endif %}
+
+                <li><a href="{% url 'article:article_titles' %}" >文章</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" style="margin-right: 10px">
+                {% if user.is_authenticated %}
+                    <li>
+                        <div class="dropdown" style="margin-top:8px">
+                            <button class="btn btn-default dropdown-toggle" type="button" id='dropdownMenu'
+                                    data-toggle="dropdown">
+                                {{ user.username }}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'account:password_change' %}">修改密码</a></li>
+                                <li><a href="{% url 'account:my_information' %}">个人资料</a></li>
+                                <li><a href="{% url 'article:article_column' %}">栏目管理</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li><a href="{% url 'account:user_logout' %}">退出登录</a></li>
+                {% else %}
+                    <li><a href="{% url 'account:user_login' %}">登录</a></li>
+                    <li><a href="{% url 'account:user_register' %}">注册</a></li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </nav>
+</div>

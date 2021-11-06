@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %} 第{{ article.id }}篇文章详情 {% endblock %}
+
+{% block content%}
+    <div class="row text-center vertical-middle-sm">
+        <h2>标题：{{ article.title }}</h2>
+    </div>
+    <div class="row">作者：{{ article.author }}</div><br/>
+    <div class="row">发表时间：{{ article.publish }}</div><br/>
+    <div class="row">文章内容：{{ article.body }}</div><br/>
+    <div class="row">
+        <p class="text-center">
+            本想仗剑走天涯，奈何bug多，山穷水复疑无路，默认回首，虫儿被捉住！
+        </p>
+    </div>
+
+{% endblock %}

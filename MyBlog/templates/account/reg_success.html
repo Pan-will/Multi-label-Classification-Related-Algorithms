@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}用户注册{% endblock %}
+
+{% block content %}
+    <div class="row text-center vertical-middle-sm">
+        <h2>用户注册成功！</h2>
+        <br/>
+        <p>接下来您可以用该账号<a href="{% url 'account:user_login' %}">登录</a> 。</p>
+    </div>
+{% endblock %}

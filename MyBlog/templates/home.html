@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}唯唯博客首页{% endblock %}
+{% block content %}
+<div class="text-center">
+    <h3>欢迎来到唯唯博客！</h3>
+    <h5>不是因为有希望才坚持，而是因为坚持才有希望。</h5>
+    {% load staticfiles %}
+    <img src="{% static 'images/homepage.jpg' %}">
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+﻿{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}用户登录{% endblock %}
+{% block content %}
+    <div class="row text-center vertical-middle-sm">
+        <p>请输入用户名和密码，然后点击登录：</p>
+        <form method="post" action="." class="form-horizontal">
+            {% csrf_token %}
+            {#{{ form.as_p }}#}
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="col-md-5 control-label" style="color:red">
+                    <span class="glyphicon glyphicon-user"></span>账号(用户名)：
+                </label>
+                <div class="col-md-6 text-left">{{ form.username }}</div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="col-md-5 control-label" style="color:blue">
+                    <span class="glyphicon glyphicon-floppy-open"></span>密码：
+                </label>
+                <div class="col-md-6 text-left">{{ form.password }}</div>
+            </div>
+            <input type="submit" class="btn btn-primary btn-lg" value="登录">
+
+            <br/><br/>
+            <p>还没有账号？您可以前往 <a href="{% url 'account:user_register' %}"> 注册</a> 。</p>
+            <p>忘记了密码？您可以前往 <a href="{% url 'account:password_reset' %}"> 重置密码</a> 。</p>
+        </form>
+    </div>
+
+{% endblock %}

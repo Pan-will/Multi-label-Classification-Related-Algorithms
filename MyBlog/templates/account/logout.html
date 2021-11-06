@@ -1,0 +1,14 @@
+﻿{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}成功退出{% endblock %}
+{% block content %}
+    <div class="row text-center vertical-middle-sm">
+        <hr/>
+        <p><h3>退出成功！</h3></p>
+        <br>
+        <p><h4>感谢您的使用和支持！</h4></p>
+        <p>接下来您或许想要 <a href="{% url 'account:user_login' %}">重新登录</a>  或前往 <a href="{% url 'account:user_register' %}">注册</a> 。</p>
+    </div>
+{% endblock %}

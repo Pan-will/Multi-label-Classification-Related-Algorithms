@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}用户注册{% endblock %}
+
+{% block content %}
+    <div class="row text-center vertical-middle-sm">
+        <h2>用户注册失败！</h2>
+        <br/>
+        <p>请确认注册信息，重新<a href="{% url 'account:user_register' %}">前往注册</a> 。</p>
+    </div>
+{% endblock %}

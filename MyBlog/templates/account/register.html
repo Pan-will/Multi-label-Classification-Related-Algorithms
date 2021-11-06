@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}用户注册{% endblock %}
+
+{% block content %}
+    <div class="row text-center vertical-middle-sm">
+        <h1>注册</h1>
+        <p>如果您有账号，请前往&nbsp;&nbsp;<strong><a href="{% url 'account:user_login' %}">登录</a></strong></p>
+        <hr/>
+        <form method="post" action="." class="form-horizontal">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="col-md-5 control-label" style="color:coral">
+                    账号(用户名)：
+                </label>
+                <div class="col-md-6 text-left">{{ form.username }}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}" class="col-md-5 control-label" style="color:coral">
+                    邮箱地址：
+                </label>
+                <div class="col-md-6 text-left">{{ form.email }}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="col-md-5 control-label" style="color:coral">
+                    密码：
+                </label>
+                <div class="col-md-6 text-left">{{ form.password }}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="col-md-5 control-label" style="color: coral">
+                    确认密码：
+                </label>
+                <div class="col-md-6 text-left">{{ form.password2 }}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ userinfo.birth.id_for_label }}" class="col-md-5 control-label" style="color: coral">
+                    生日：
+                </label>
+                <div class="col-md-6 text-left">{{ userinfo.birth }}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ userinfo.phone.id_for_label }}" class="col-md-5 control-label" style="color: coral">
+                    手机号：
+                </label>
+                <div class="col-md-6 text-left">{{ userinfo.phone }}</div>
+            </div>
+
+            <input type="submit" class="btn btn-primary btn-lg" value="提交">
+        </form>
+    </div>
+
+{% endblock %}
