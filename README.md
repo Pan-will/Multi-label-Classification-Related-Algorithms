@@ -19,7 +19,11 @@
 
 
 
-## 9、Mondrian Forests
+
+
+
+
+## 10、Mondrian Forests
 
 来自论文：Mondrian Forests: Efficient Online Random Forests
 
@@ -27,13 +31,13 @@
 
 
 
-## 8、增量式随机树和随机森林算法
+## 9、增量式随机树和随机森林算法
 
 如题。
 
 
 
-## 7、MLDF
+## 8、MLDF
 
 论文出处：Yang L , Wu X Z , Jiang Y , et al. Multi-Label Learning with Deep Forest[J]. 2019.
 
@@ -42,6 +46,16 @@
 MLDF是多标签数据分类算法，模型是静态批量式学习。
 
 实验中用到的数据集全都可以在  http://mulan.sourceforge.net/datasets-mlc.html  下载。
+
+
+
+## 7、Batch Multi-label Hoeffding Tree
+
+多标签霍夫丁树，batch式增量学习。可以跑。
+
+项目中有个Multi-label ClassifierCC（MLCC）算法的Python实现，用于对比。
+
+项目中有几个PDF课件作参考。
 
 
 
