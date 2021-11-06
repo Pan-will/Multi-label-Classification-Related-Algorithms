@@ -13,7 +13,7 @@ from MultiLabelHoeffdingTree import MultiLabelHoeffdingTreeClassifier
 def load_csv():
     data_split = 0.6
     # 数据集目录和文件
-    data_dir = 'D:/Pycharm2020.1.3/WorkSpace/BatchMultiLabelClassifier/ML_Dataset'
+    data_dir = 'F:/GitHub/Multi-label-Classification-Related-Algorithms/BatchMultiLabelClassifier/ML_Dataset'
     dataset_name = '/scene_data.csv'
     label_name = '/scene_label.csv'
 
