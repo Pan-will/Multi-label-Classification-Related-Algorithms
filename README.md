@@ -19,7 +19,19 @@
 
 
 
+## 12、Adaptive Random Forest
 
+来自论文：https://www.researchgate.net/publication/317579226_Adaptive_random_forests_for_evolving_data_stream_classification
+
+**自适应随机森林**，项目中还实现了**自适应霍夫丁树**。
+
+流数据场景，单标签分类。
+
+
+
+## 11、DeepMIML
+
+深度学习模型，多实例多标签学习模型。
 
 
 
