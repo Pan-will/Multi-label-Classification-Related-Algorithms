@@ -1,5 +1,17 @@
-# Multi-label-Classification-Related-Algorithms
 硕士小论文对比过的几个算法，有复现的、也有作者提供的，做个备份。场景：多标签数据分类，多标签预测。
+
+
+
+## 搜罗了几个权威的多标签数据集下载网站（实验常用的数据集都能找到）：
+
+1. http://waikato.github.io/meka/datasets/
+2.  http://mulan.sourceforge.net/datasets-mlc.html
+3. https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
+4. https://sci2s.ugr.es/keel/multilabel.php
+5. https://www.uco.es/kdis/mllresources/
+6. http://mlkd.csd.auth.gr/concept_drift.html
+7. 带概念漂移的数据集：https://www.win.tue.nl/~mpechen/data/DriftSets/
+8. 带冗余特征的数据集，用于特征选择实验：https://jundongl.github.io/scikit-feature/datasets.html
 
 
 
@@ -7,7 +19,13 @@
 
 
 
-## 8、MLDF
+## 8、增量式随机树和随机森林算法
+
+如题。
+
+
+
+## 7、MLDF
 
 论文出处：Yang L , Wu X Z , Jiang Y , et al. Multi-Label Learning with Deep Forest[J]. 2019.
 
@@ -16,12 +34,6 @@
 MLDF是多标签数据分类算法，模型是静态批量式学习。
 
 实验中用到的数据集全都可以在  http://mulan.sourceforge.net/datasets-mlc.html  下载。
-
-
-
-## 7、gcForest：深度森林
-
-
 
 
 
@@ -51,7 +63,7 @@ MLDF是多标签数据分类算法，模型是静态批量式学习。
 
 很牛逼的一个多标签分类算法，后面的什么级联模型、深度森林模型，在one-error、汉明损失、精度等几个指标 上，就没有比得过MLKNN的，KNN  yyds~。
 
-这里是MATLAB版代码，后面再更新Python版吧。
+项目里有MATLAB版和Python版。
 
 
 
