@@ -1,0 +1,252 @@
+Index: GCForest/gcForest.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from sklearn.model_selection import KFold\r\nfrom .layer import *\r\nimport numpy as np\r\n\r\n# deep gcForest的伪代码：\r\n# input = multi_Granined Scanning 的结果\r\n# for level_i in range(num_levels):\r\n#     # level_i层处理后的结果\r\n#     result = level_i(input)\r\n#     # 更新输入向量，将本层的输入和本轮的输出拼接，作为下一层的输入\r\n#     Input = Concatenate(result, Input)\r\n#     # 对最后一层中每个Forest的结果求均值\r\n#     Score = AVE(最后一层的result)\r\n#     # 将Score中值最大的最为最终预测\r\n#     Class = MAX(Score)\r\n\r\ndef compute_loss(target, predict):  # 对数误差函数\r\n    temp = np.log(abs(target + 1)) - np.log(abs(predict + 1))\r\n    res = np.dot(temp, temp) / len(temp)  # 向量点乘后平均\r\n    return res\r\n\r\n# 定义gcforest模型\r\nclass gcForest:\r\n    def __init__(self, num_estimator, num_forests, max_layer=2, max_depth=31, n_fold=5):\r\n        self.num_estimator = num_estimator#每个森林中树的数量\r\n        self.num_forests = num_forests#森林数量\r\n        self.n_fold = n_fold\r\n        self.max_depth = max_depth\r\n        self.max_layer = max_layer\r\n        self.model = []\r\n\r\n    def train(self, train_data, train_label, weight):\r\n        num_samples, num_features = train_data.shape\r\n\r\n        # basis process\r\n        train_data_new = train_data.copy()\r\n\r\n        # return value\r\n        val_p = []\r\n        best_train_loss = 0.0\r\n        layer_index = 0\r\n        best_layer_index = 0\r\n        bad = 0\r\n\r\n        kf = KFold(2, True, self.n_fold).split(train_data_new.shape[0])\r\n        # 这里加入k折交叉验证\r\n        while layer_index < self.max_layer:\r\n\r\n            print(\"layer \" + str(layer_index))\r\n            # 其实这一个layer是个夹心layer，是2层layer的平均结果\r\n            layer = KfoldWarpper(self.num_forests, self.num_estimator, self.n_fold, kf, layer_index, self.max_depth, 1)\r\n            val_prob, val_stack = layer.train(train_data_new, train_label, weight)\r\n\r\n            # 使用该层进行训练\r\n            train_data_new = np.concatenate([train_data, val_stack], axis=1)\r\n            # 将该层的训练结果也加入到train_data中\r\n            temp_val_loss = compute_loss(train_label, val_prob)\r\n            print(\"val   loss:\" + str(temp_val_loss))\r\n\r\n            if best_train_loss < temp_val_loss:  # 用于控制加入的层数，如果加入的层数较多，且误差没有下降也停止运行\r\n                bad += 1\r\n            else:\r\n                bad = 0\r\n                best_train_loss = temp_val_loss\r\n                best_layer_index = layer_index\r\n            if bad >= 3:\r\n                break\r\n\r\n            layer_index = layer_index + 1\r\n\r\n            self.model.append(layer)\r\n\r\n        for index in range(len(self.model), best_layer_index + 1, -1):  # 删除多余的layer\r\n            self.model.pop()\r\n\r\n    def predict(self, test_data):\r\n        test_data_new = test_data.copy()\r\n        test_prob = []\r\n        for layer in self.model:\r\n            predict, test_stack = layer.predict(test_data_new)\r\n            test_data_new = np.concatenate([test_data, test_stack], axis=1)\r\n        return predict\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- GCForest/gcForest.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/gcForest.py	(date 1607393618100)
+@@ -2,6 +2,7 @@
+ from .layer import *
+ import numpy as np
+ 
++
+ # deep gcForest的伪代码：
+ # input = multi_Granined Scanning 的结果
+ # for level_i in range(num_levels):
+@@ -19,11 +20,12 @@
+     res = np.dot(temp, temp) / len(temp)  # 向量点乘后平均
+     return res
+ 
++
+ # 定义gcforest模型
+ class gcForest:
+     def __init__(self, num_estimator, num_forests, max_layer=2, max_depth=31, n_fold=5):
+-        self.num_estimator = num_estimator#每个森林中树的数量
+-        self.num_forests = num_forests#森林数量
++        self.num_estimator = num_estimator  # 每个森林中树的数量
++        self.num_forests = num_forests  # 森林数量
+         self.n_fold = n_fold
+         self.max_depth = max_depth
+         self.max_layer = max_layer
+Index: GCForest/layer.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from sklearn.ensemble import ExtraTreesRegressor  # 引入极端森林回归\r\nfrom sklearn.ensemble import RandomForestRegressor  # 引入随机森林回归\r\nimport numpy as np\r\n\r\n# 定义层类\r\nclass Layer:\r\n    def __init__(self, n_estimators, num_forests, max_depth=30, min_samples_leaf=1):\r\n        self.num_forests = num_forests  # 定义森林数\r\n        self.n_estimators = n_estimators  # 每个森林的树个数\r\n        self.max_depth = max_depth  # 每一颗树的最大深度\r\n        self.min_samples_leaf = min_samples_leaf  # 树会生长到所有叶子都分到一个类，或者某节点所代表的样本数已小于min_samples_leaf\r\n        self.model = []  # 最后产生的类向量\r\n\r\n    def train(self, train_data, train_label, weight, val_data):  # 训练函数\r\n        val_prob = np.zeros([self.num_forests, val_data.shape[\r\n            0]])  # 定义出该层的类向量，有self.num_forersts行，val_data.shape[0]列，这里我们认为val_data应该就是我们的weight\r\n\r\n        for forest_index in range(self.num_forests):  # 对具体的layer内的森林进行构建\r\n            if forest_index % 2 == 0:  # 如果是第偶数个，设为随机森林\r\n                clf = RandomForestRegressor(n_estimators=self.n_estimators,  # 子树的个数,\r\n                                            n_jobs=-1,  # cpu并行树，-1表示和cpu的核数相同\r\n                                            max_depth=self.max_depth,  # 最大深度\r\n                                            min_samples_leaf=self.min_samples_leaf)\r\n                clf.fit(train_data, train_label, weight)  # weight是取样比重Sample weights\r\n                val_prob[forest_index, :] = clf.predict(val_data)  # 记录类向量\r\n            else:  # 如果是第奇数个，就设为极端森林\r\n                clf = ExtraTreesRegressor(n_estimators=self.n_estimators,  # 森林所含树的个数\r\n                                          n_jobs=-1,  # 并行数\r\n                                          max_depth=self.max_depth,  # 最大深度\r\n                                          min_samples_leaf=self.min_samples_leaf)  # 最小叶子限制\r\n                clf.fit(train_data, train_label, weight)\r\n                val_prob[forest_index, :] = clf.predict(val_data)  # 记录类向量\r\n\r\n            self.model.append(clf)  # 组建layer层\r\n\r\n        val_avg = np.sum(val_prob, axis=0)  # 按列进行求和\r\n        val_avg /= self.num_forests  # 求平均\r\n        val_concatenate = val_prob.transpose((1, 0))  # 对记录的类向量矩阵进行转置\r\n        return [val_avg, val_concatenate]  # 返回平均结果和转置后的类向量矩阵\r\n\r\n    def predict(self, test_data):  # 定义预测函数，也是最后一层的功能\r\n        predict_prob = np.zeros([self.num_forests, test_data.shape[0]])\r\n        for forest_index, clf in enumerate(self.model):\r\n            predict_prob[forest_index, :] = clf.predict(test_data)\r\n\r\n        predict_avg = np.sum(predict_prob, axis=0)\r\n        predict_avg /= self.num_forests\r\n        predict_concatenate = predict_prob.transpose((1, 0))\r\n        return [predict_avg, predict_concatenate]\r\n\r\n\r\nclass KfoldWarpper:  # 定义每个树进行训练的所用的数据\r\n    def __init__(self, num_forests, n_estimators, n_fold, kf, layer_index, max_depth=31,\r\n                 min_samples_leaf=1):  # 包括森林树，森林使用树的个数，k折的个数，k-折交叉验证，第几层，最大深度，最小叶子节点限制\r\n        self.num_forests = num_forests\r\n        self.n_estimators = n_estimators\r\n        self.n_fold = n_fold\r\n        self.kf = kf\r\n        self.layer_index = layer_index\r\n        self.max_depth = max_depth\r\n        self.min_samples_leaf = min_samples_leaf\r\n        self.model = []\r\n\r\n    def train(self, train_data, train_label, weight):\r\n        num_samples, num_features = train_data.shape\r\n\r\n        val_prob = np.empty([num_samples])\r\n        # 创建新的空矩阵，num_samples行，num_forest列，用于放置预测结果\r\n        val_prob_concatenate = np.empty([num_samples, self.num_forests])\r\n\r\n        for train_index, test_index in self.kf:  # 进行k折交叉验证，在train_data里创建交叉验证的补充\r\n            X_train = train_data[train_index, :]  # 选出训练集\r\n            X_val = train_data[test_index, :]  # 验证集\r\n            y_train = train_label[train_index]  # 训练标签\r\n            weight_train = weight[train_index]  # 训练集对应的权重\r\n\r\n            # 加入层\r\n            layer = Layer(self.n_estimators, self.num_forests, self.max_depth, self.min_samples_leaf)\r\n            # 记录输出的结果\r\n            val_prob[test_index], val_prob_concatenate[test_index, :] = layer.train(X_train, y_train, weight_train, X_val)\r\n            self.model.append(layer)  # 在模型中填充层级，这也是导致程序吃资源的部分，每次进行\r\n        return [val_prob, val_prob_concatenate]\r\n\r\n    def predict(self, test_data):  # 定义预测函数，用做下一层的训练数据\r\n\r\n        test_prob = np.zeros([test_data.shape[0]])\r\n        test_prob_concatenate = np.zeros([test_data.shape[0], self.num_forests])\r\n        for layer in self.model:\r\n            temp_prob, temp_prob_concatenate = \\\r\n                layer.predict(test_data)\r\n\r\n            test_prob += temp_prob\r\n            test_prob_concatenate += temp_prob_concatenate\r\n        test_prob /= self.n_fold\r\n        test_prob_concatenate /= self.n_fold\r\n\r\n        return [test_prob, test_prob_concatenate]\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- GCForest/layer.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/layer.py	(date 1607393618057)
+@@ -2,6 +2,7 @@
+ from sklearn.ensemble import RandomForestRegressor  # 引入随机森林回归
+ import numpy as np
+ 
++
+ # 定义层类
+ class Layer:
+     def __init__(self, n_estimators, num_forests, max_depth=30, min_samples_leaf=1):
+@@ -77,7 +78,8 @@
+             # 加入层
+             layer = Layer(self.n_estimators, self.num_forests, self.max_depth, self.min_samples_leaf)
+             # 记录输出的结果
+-            val_prob[test_index], val_prob_concatenate[test_index, :] = layer.train(X_train, y_train, weight_train, X_val)
++            val_prob[test_index], val_prob_concatenate[test_index, :] = layer.train(X_train, y_train, weight_train,
++                                                                                    X_val)
+             self.model.append(layer)  # 在模型中填充层级，这也是导致程序吃资源的部分，每次进行
+         return [val_prob, val_prob_concatenate]
+ 
+Index: learner/warpper.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\n\r\nfrom .Layer import Layer\r\n\r\n\r\nclass KfoldWarpper:\r\n    # 参数：森林数=2，每个森里中的树的数量=40，交叉验证的倍数=5，层序号（1~20，for循环ing），步数=3\r\n    def __init__(self, num_forests, n_estimators, n_fold, kf, layer_index, step=3):\r\n        self.num_forests = num_forests\r\n        self.n_estimators = n_estimators\r\n        self.n_fold = n_fold\r\n        self.kf = kf\r\n        self.layer_index = layer_index\r\n        self.step = step\r\n        # 最终模型集C = {layer 1，...,layer L}\r\n        self.model = []\r\n\r\n    def train(self, train_data, train_label):\r\n        \"\"\"\r\n        :param train_data:训练数据\r\n        :param train_label:对应标签\r\n        :return:\r\n            prob: array, whose shape is (num_samples, num_labels)，一个数组，实例数是行数，标签数是列数\r\n            prob_concatenate\r\n        \"\"\"\r\n        # 标签数是训练标签集的列数\r\n        self.num_labels = train_label.shape[1]\r\n\r\n        # 实例数、特征数分别是训练集的行数和列数，注意区分特征和标签\r\n        num_samples, num_features = train_data.shape\r\n\r\n        # 构造一个二维矩阵，规模是（实例数，标签数），构造的矩阵不为空\r\n        prob = np.empty([num_samples, self.num_labels])\r\n        # 构造一个二维矩阵，规模是（森林数，实例数，标签数）=（2，实例数，标签数），构造的矩阵不为空，用于放置预测结果\r\n        prob_concatenate = np.empty([self.num_forests, num_samples, self.num_labels])\r\n\r\n        fold = 0\r\n        # train_data维度：（1000, 304）\r\n        for train_index, test_index in self.kf:  # 进行k折交叉验证，在train_data里创建交叉验证的补充\r\n            # train_data的shape：(1204, 294)，切片有三个参数，第一个是块下标，后面两个跟二维数组一样\r\n            # 也就是每趟循环取一个训练数据、测试数据、训练数据对应标签\r\n            \"\"\"\r\n            原始的数据集划成了4份：train_data（251，68）、test_data（251，68）、train_label（251，174）、test_label（251，174）；\r\n            这里又把data部分划成了(167, 68)、(84, 68)；label部分划成了(167, 174)、(84, 174)\r\n            X_train: <class 'numpy.ndarray'> (167, 68) 167\r\n            X_val <class 'numpy.ndarray'> (84, 68) 84\r\n            y_train <class 'numpy.ndarray'> (167, 174) 167\r\n            \"\"\"\r\n            X_train = train_data[train_index, :]# 选出训练集\r\n            X_val = train_data[test_index, :]# 验证集\r\n            y_train = train_label[train_index, :]# 训练标签\r\n            # weight_train = weight[train_index]  # 训练集对应的权重\r\n\r\n            # 加入层：构建第fold个层类\r\n            # 构建层类，参数列表：每个森林树的数量=40，森林数量=2，标签数=5（不同数据集，标签数不同），步数=3，层序号，交叉验证倍数\r\n            layer = Layer(self.n_estimators, self.num_forests, self.num_labels, self.step, self.layer_index, fold)\r\n\r\n            # layer层的训练，参数：训练集，对应标签\r\n            layer.train(X_train, y_train)\r\n\r\n            self.model.append(layer)\r\n            fold += 1\r\n            # 做预测，参数是新划分的test矩阵，shape是（84，68），返回值是[预测值针对森林数取得均值， 按分类器存放的预测值]\r\n            prob[test_index], prob_concatenate[:, test_index, :] = layer.predict(X_val)\r\n        return [prob, prob_concatenate]\r\n\r\n    def predict(self, test_data):\r\n        test_prob = np.zeros([test_data.shape[0], self.num_labels])\r\n        test_prob_concatenate = np.zeros([self.num_forests, test_data.shape[0], self.num_labels])\r\n        for layer in self.model:\r\n            temp_prob, temp_prob_concatenate = layer.predict(test_data)\r\n            test_prob += temp_prob\r\n            test_prob_concatenate += temp_prob_concatenate\r\n        test_prob /= self.n_fold\r\n        test_prob_concatenate /= self.n_fold\r\n        return [test_prob, test_prob_concatenate]\r\n\r\n    def train_and_predict(self, train_data, train_label, test_data):\r\n        prob, prob_concatenate = self.train(train_data, train_label)\r\n        test_prob, test_prob_concatenate = self.predict(test_data)\r\n        return [prob, prob_concatenate, test_prob, test_prob_concatenate]\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- learner/warpper.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ learner/warpper.py	(date 1607415287820)
+@@ -4,7 +4,7 @@
+ 
+ 
+ class KfoldWarpper:
+-    # 参数：森林数=2，每个森里中的树的数量=40，交叉验证的倍数=5，层序号（1~20，for循环ing），步数=3
++    # 参数：森林数=2，每个森里中的树的数量=40，交叉验证的倍数=5，层序号（1~20，for循环ing）
+     def __init__(self, num_forests, n_estimators, n_fold, kf, layer_index, step=3):
+         self.num_forests = num_forests
+         self.n_estimators = n_estimators
+@@ -27,15 +27,18 @@
+         self.num_labels = train_label.shape[1]
+ 
+         # 实例数、特征数分别是训练集的行数和列数，注意区分特征和标签
++        # train_data维度：（1000, 304）
+         num_samples, num_features = train_data.shape
+ 
+         # 构造一个二维矩阵，规模是（实例数，标签数），构造的矩阵不为空
++        # 概率
+         prob = np.empty([num_samples, self.num_labels])
+         # 构造一个二维矩阵，规模是（森林数，实例数，标签数）=（2，实例数，标签数），构造的矩阵不为空，用于放置预测结果
++        # 概率连接
+         prob_concatenate = np.empty([self.num_forests, num_samples, self.num_labels])
+-
++        # 计数构建的层数
+         fold = 0
+-        # train_data维度：（1000, 304）
++        # train_index，test_index——即训练集的索引，验证集的索引
+         for train_index, test_index in self.kf:  # 进行k折交叉验证，在train_data里创建交叉验证的补充
+             # train_data的shape：(1204, 294)，切片有三个参数，第一个是块下标，后面两个跟二维数组一样
+             # 也就是每趟循环取一个训练数据、测试数据、训练数据对应标签
+@@ -46,9 +49,9 @@
+             X_val <class 'numpy.ndarray'> (84, 68) 84
+             y_train <class 'numpy.ndarray'> (167, 174) 167
+             """
+-            X_train = train_data[train_index, :]# 选出训练集
+-            X_val = train_data[test_index, :]# 验证集
+-            y_train = train_label[train_index, :]# 训练标签
++            X_train = train_data[train_index, :]  # 选出训练集
++            X_val = train_data[test_index, :]  # 验证集
++            y_train = train_label[train_index, :]  # 训练标签
+             # weight_train = weight[train_index]  # 训练集对应的权重
+ 
+             # 加入层：构建第fold个层类
+Index: learner/Layer.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\"\"\"\r\n层类\r\n\"\"\"\r\nimport numpy as np\r\nfrom sklearn.ensemble import ExtraTreesClassifier\r\nfrom sklearn.ensemble import RandomForestClassifier\r\n\r\nclass Layer:\r\n    # 构建层类，参数列表：每个森林树的数量=40，森林数量=2，标签数=5（不同数据集，标签数不同），步数=3，层序号（从0开始），交叉验证倍数\r\n    def __init__(self, n_estimators, num_forests, num_labels, step=3, layer_index=0, fold=0):\r\n        \"\"\"\r\n        :param n_estimators: 每个森林中树的数量=40\r\n        :param num_forests: 森林数量=2\r\n        :param num_labels: 标签数量\r\n        :param step: 步数=3\r\n        :param layer_index: 层序号\r\n        :param fold:\r\n        \"\"\"\r\n        self.n_estimators = n_estimators\r\n        self.num_labels = num_labels\r\n        self.num_forests = num_forests\r\n        self.layer_index = layer_index\r\n        self.fold = fold\r\n        self.step = step\r\n        self.model = []\r\n\r\n    # 参数是原train_data（251，68），train_label(251,174)进一步划分过的：(167, 68)、(167, 174)\r\n    # 逐个森林分别训练分类器，并挨个放到self.model中\r\n    def train(self, train_data, train_label):\r\n        \"\"\"\r\n        :param train_data: 训练数据集\r\n        :param train_label: 训练数据对应的标签\r\n        :return:\r\n        \"\"\"\r\n\r\n\r\n        # 疑问：求森林数、最大深度有何用处？\r\n\r\n\r\n\r\n        # 在第一层中，每个森林中有40棵树，然后比上一层增加20棵树，直到树数达到100，最多100棵树；\r\n        n_estimators = min(20 * self.layer_index + self.n_estimators, 100)\r\n        # 最大深度 = 步数*层序号 + 步数\r\n        max_depth = self.step * self.layer_index + self.step\r\n\r\n\r\n\r\n        # 遍历森林块，从cascade层传递过来num_forests=2\r\n        for forest_index in range(self.num_forests):\r\n            # 第偶数个森林，用随机森林分类器，bootstrap参数值默认True\r\n            if forest_index % 2 == 0:\r\n                \"\"\"\r\n                参考博文：https://blog.csdn.net/w952470866/article/details/78987265/\r\n                随机森林分类器。随机森林是一种元估计量，它适合数据集各个子样本上的许多决策树分类器，\r\n                并使用平均数来提高预测准确性和控制过度拟合。 \r\n                子样本大小始终与原始输入样本大小相同，但是如果bootstrap = True（默认值），则将替换绘制样本。\r\n                为了降低内容消耗，决策树的复杂度和大小应该通过设置这些参数值来控制。\r\n                参数列表：\r\n                 n_estimators: Any = 10,森林里（决策）树的数目。\r\n                 criterion: Any = \"gini\",衡量分裂质量的性能（函数）,Gini不纯度和Gini系数没有关系。\r\n                 max_depth: Any = None,（决策）树的最大深度\r\n                 min_samples_split: Any = 2,分割内部节点所需要的最小样本数量,默认值2\r\n                 min_samples_leaf: Any = 1,需要在叶子结点上的最小样本数量，默认值1\r\n                 min_weight_fraction_leaf: Any = 0.,一个叶子节点所需要的权重总和（所有的输入样本）的最小加权分数。当sample_weight没有提供时，样本具有相同的权重\r\n                 max_features: Any = \"auto\",寻找最佳分割时需要考虑的特征数目\r\n                 max_leaf_nodes: Any = None,以最优的方法使用max_leaf_nodes来生长树。最好的节点被定义为不纯度上的相对减少。如果为None,那么不限制叶子节点的数量。\r\n                 min_impurity_decrease: Any = 0.,如果节点的分裂导致的不纯度的下降程度大于或者等于这个节点的值，那么这个节点将会被分裂。\r\n                 min_impurity_split: Any = None,树早期生长的阈值。如果一个节点的不纯度超过阈值那么这个节点将会分裂，否则它还是一片叶子。\r\n                 bootstrap: Any = True,建立决策树时，是否使用有放回抽样\r\n                 oob_score: Any = False,是否使用袋外样本来估计泛化精度。\r\n                 n_jobs: Any = 1,用于拟合和预测的并行运行的工作（作业）数量。如果值为-1，那么工作数量被设置为核的数量。\r\n                 random_state: Any = None,RandomStateIf int，random_state是随机数生成器使用的种子; 如果是RandomState实例，random_state就是随机数生成器; 如果为None，则随机数生成器是np.random使用的RandomState实例。\r\n                 verbose: Any = 0,控制决策树建立过程的冗余度 \r\n                 warm_start: Any = False,当被设置为True时，重新使用之前呼叫的解决方案，用来给全体拟合和添加更多的估计器，反之，仅仅只是为了拟合一个全新的森林。\r\n                 class_weight: Any = None) -> None\r\n                \"\"\"\r\n                clf = RandomForestClassifier(n_estimators=n_estimators,\r\n                                             criterion=\"gini\",\r\n                                             max_depth=max_depth,\r\n                                             n_jobs=-1)\r\n            # 第奇数个森林，用极端随机森林分类器\r\n            # 一般情况下，极端随机森林分类器在分类精度和训练时间等方面都要优于随机森林分类器。\r\n            else:\r\n                clf = ExtraTreesClassifier(n_estimators=n_estimators,\r\n                                           criterion=\"gini\",\r\n                                           max_depth=max_depth,\r\n                                           n_jobs=-1)\r\n            clf.fit(train_data, train_label)\r\n            self.model.append(clf)\r\n        self.layer_index += 1\r\n\r\n    # 预测\r\n    def predict(self, test_data):\r\n        # 设置一个三维空矩阵，shape是（森林数，参数中test_data的行数，标签数）\r\n        predict_prob = np.zeros([self.num_forests, test_data.shape[0], self.num_labels])\r\n        # 遍历上一步逐个森林训练好的分类器\r\n        for forest_index, clf in enumerate(self.model):\r\n            # 每个分类器都做预测，单个分类器的预测结果predict_p的信息：嵌套list，维度（174，51）\r\n            predict_p = clf.predict_proba(test_data)\r\n            # print(type(predict_p), len(predict_p), len(predict_p[0]))\r\n            # 遍历当前分类器的预测结果list\r\n            for j in range(len(predict_p)):\r\n                # 三维空矩阵[分类器序号，全部行，前j列] = 1-predict_p[j][:, 0]的转置矩阵\r\n                predict_prob[forest_index, :, j] = 1 - predict_p[j][:, 0].T\r\n        # 三维矩阵求和，axis取多少，就表明在哪个维度上求和；\r\n        # axis=0表示矩阵内部对应元素之间求和，结果是一个矩阵，其维度与三维矩阵的第一个元素相同，只不过元素是求的和\r\n        # 按列进行求和\r\n        prob_avg = np.sum(predict_prob, axis=0)\r\n        # 针对森林数取均值——注意不是针对分类器个数取均值\r\n        # 求平均\r\n        prob_avg /= self.num_forests\r\n        prob_concatenate = predict_prob\r\n        # 返回值是[预测值针对森林数取得均值， 按分类器存放的预测值]\r\n        return [prob_avg, prob_concatenate]\r\n\r\n    def train_and_predict(self, train_data, train_label, val_data, test_data):\r\n        self.train(train_data, train_label)\r\n        val_avg, val_concatenate = self.predict(val_data)\r\n        prob_avg, prob_concatenate = self.predict(test_data)\r\n\r\n        return [val_avg, val_concatenate, prob_avg, prob_concatenate]\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- learner/Layer.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ learner/Layer.py	(date 1607417737705)
+@@ -4,9 +4,11 @@
+ import numpy as np
+ from sklearn.ensemble import ExtraTreesClassifier
+ from sklearn.ensemble import RandomForestClassifier
++from sklearn.ensemble import ExtraTreesRegressor
++from sklearn.ensemble import AdaBoostClassifier
+ 
+ class Layer:
+-    # 构建层类，参数列表：每个森林树的数量=40，森林数量=2，标签数=5（不同数据集，标签数不同），步数=3，层序号（从0开始），交叉验证倍数
++    # 构建层类，参数列表：每个森林树的数量=40，森林数量=2，标签数=5（不同数据集，标签数不同），步数=3，层序号（从0开始）
+     def __init__(self, n_estimators, num_forests, num_labels, step=3, layer_index=0, fold=0):
+         """
+         :param n_estimators: 每个森林中树的数量=40
+@@ -42,14 +44,14 @@
+         n_estimators = min(20 * self.layer_index + self.n_estimators, 100)
+         # 最大深度 = 步数*层序号 + 步数
+         max_depth = self.step * self.layer_index + self.step
+-
++        min_samples_leaf = 1
+ 
+ 
+         # 遍历森林块，从cascade层传递过来num_forests=2
+         for forest_index in range(self.num_forests):
+             # 第偶数个森林，用随机森林分类器，bootstrap参数值默认True
+-            if forest_index % 2 == 0:
+-                """
++            # if forest_index % 2 == 0:
++            """
+                 参考博文：https://blog.csdn.net/w952470866/article/details/78987265/
+                 随机森林分类器。随机森林是一种元估计量，它适合数据集各个子样本上的许多决策树分类器，
+                 并使用平均数来提高预测准确性和控制过度拟合。 
+@@ -74,17 +76,17 @@
+                  warm_start: Any = False,当被设置为True时，重新使用之前呼叫的解决方案，用来给全体拟合和添加更多的估计器，反之，仅仅只是为了拟合一个全新的森林。
+                  class_weight: Any = None) -> None
+                 """
+-                clf = RandomForestClassifier(n_estimators=n_estimators,
+-                                             criterion="gini",
+-                                             max_depth=max_depth,
+-                                             n_jobs=-1)
++            clf = RandomForestClassifier(n_estimators=n_estimators,
++                                         criterion="gini",
++                                         max_depth=max_depth,
++                                         n_jobs=-1)
+             # 第奇数个森林，用极端随机森林分类器
+             # 一般情况下，极端随机森林分类器在分类精度和训练时间等方面都要优于随机森林分类器。
+-            else:
+-                clf = ExtraTreesClassifier(n_estimators=n_estimators,
+-                                           criterion="gini",
+-                                           max_depth=max_depth,
+-                                           n_jobs=-1)
++            # else:
++            #     clf = ExtraTreesClassifier(n_estimators=n_estimators,
++            #                                criterion="gini",
++            #                                max_depth=max_depth,
++            #                                n_jobs=-1)
+             clf.fit(train_data, train_label)
+             self.model.append(clf)
+         self.layer_index += 1
+Index: learner/cascade.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\"\"\"\r\n树级联成森林\r\n森林最大层数：20\r\n森林数：2\r\n\"\"\"\r\nfrom sklearn.cross_validation import KFold, StratifiedKFold\r\n# from sklearn.model_selection import KFold\r\n\r\nfrom sklearn.model_selection import train_test_split\r\nfrom .measure import *\r\nfrom .warpper import KfoldWarpper\r\n\r\n\r\nclass Cascade:\r\n    # 本实验将最大层数（T）设置为20\r\n    def __init__(self, dataname, max_layer=20, num_forests=2, n_fold=5, step=3):\r\n        \"\"\"\r\n        :param dataname: 数据集名称\r\n        :param max_layer: 森林最大层数，设为20\r\n        :param num_forests: 每一层的森林数量，设为2\r\n        :param n_fold: 每一层交叉验证倍数，设为5\r\n        :param step: 迭代次数，设为3\r\n        \"\"\"\r\n        self.max_layer = max_layer\r\n        self.n_fold = n_fold\r\n        self.step = step\r\n        self.layer_list = []\r\n        self.num_forests = num_forests\r\n        self.dataname = dataname\r\n        self.eta = []\r\n        self.model = []\r\n\r\n    # 针对六个多标签指标（用supervise表示），计算置信度，公式如论文中的表2所示，结果用alpha表示\r\n    # P是预测值矩阵\r\n    def compute_confidence(self, supervise, P):\r\n        \"\"\"\r\n        :param supervise: string (e.g. \"hamming loss\", \"one-error\")，即指标\r\n        :param P: array, whose shape is (num_samples, num_labels)\r\n        :return alpha: array, whose shape is :\r\n                        (num_samples, ) when supervise is instance-based measure,\r\n                        and (num_labels, ) when supervise is label-based measure\r\n        \"\"\"\r\n        m, l = P.shape[0], P.shape[1]\r\n        print(\"计算置信度，当前层的实例数、标签数：\", m, l)\r\n        if supervise == \"hamming loss\":\r\n            alpha = np.sum(np.abs(P - 0.5) + 0.5, axis=0) / m\r\n        elif supervise == \"one-error\":\r\n            alpha = np.max(P, axis=1)\r\n        elif supervise == \"ranking loss\" or supervise == \"average precision\":\r\n            forward_prod = np.sort(P, axis=1)\r\n            backward_prod = 1 - forward_prod\r\n            for j in range(1, l, 1):\r\n                forward_prod[:, j] = forward_prod[:, j - 1] * P[:, j]\r\n            for j in range(l - 2, -1, -1):\r\n                backward_prod[:, j] = backward_prod[:, j + 1] * (1 - P[:, j])\r\n            alpha = forward_prod[:, l - 1] + backward_prod[:, 0]\r\n            for j in range(l - 1):\r\n                alpha += forward_prod[:, j] * backward_prod[:, j + 1]\r\n        elif supervise == \"coverage\":\r\n            backward_prod = 1 - np.sort(P, axis=1)\r\n            for j in range(l - 2, -1, -1):\r\n                backward_prod[:, j] = backward_prod[:, j + 1] * (1 - P[:, j])\r\n            alpha = backward_prod[:, 0]\r\n            for j in range(l - 1):\r\n                alpha += j * P[:, j] * backward_prod[:, j + 1]\r\n            alpha = 1 - alpha / l\r\n        elif supervise == \"macro_auc\":\r\n            forward_prod = np.sort(P, axis=0)\r\n            backward_prod = 1 - P.copy()\r\n            for i in range(1, m, 1):\r\n                forward_prod[i, :] = forward_prod[i - 1, :] * P[i, :]\r\n            for i in range(m - 2, -1, -1):\r\n                backward_prod[i, :] = backward_prod[i + 1, :] * (1 - P[i, :])\r\n            alpha = forward_prod[m - 1, :] + backward_prod[0, :]\r\n            for i in range(m - 1):\r\n                alpha += forward_prod[i, :] * backward_prod[i + 1, :]\r\n        return alpha\r\n\r\n    # 在第一层中，每个森林中有40棵树，然后比上一层增加20棵树，直到树数达到100\r\n    # 形参中指定了参数默认值，但是调用时以实参为准\r\n    def train(self, train_data_raw, train_label_raw, supervise, n_estimators=40):\r\n        \"\"\"\r\n        :param train_data_raw: array, whose shape is (num_samples, num_features)\r\n        :param train_label_raw: array, whose shape is (num_samples, num_labels)\r\n        :param supervise: string, (e.g. \"hamming loss\", \"one-error\")\r\n        :param n_estimators: int, 每个森林块中树的数量，本实验中设为40\r\n        \"\"\"\r\n        # 将参数中的训练集、对应的标签集复制一份\r\n        train_data = train_data_raw.copy()\r\n        train_label = train_label_raw.copy()\r\n        # 标签数取的是训练标签集的列数\r\n        self.num_labels = train_label.shape[1]\r\n        # 初始化指标值，不同的指标初值不同\r\n        best_value = init_supervise(supervise)\r\n        bad = 0\r\n        # 初始化一个和train_label矩阵一样规模的矩阵，但元素不是空\r\n        best_train_prob = np.empty(train_label.shape)\r\n        # 初始化一个三维矩阵：每层的森林数、实例数、标签数\r\n        best_concatenate_prob = np.empty([self.num_forests, train_data.shape[0], self.num_labels])\r\n\r\n        print(\"$\" * 50)\r\n\r\n        # max_layer = 20，遍历森林的每一层，逐层训练\r\n        for layer_index in range(self.max_layer):\r\n            print(\"训练第\" + str(layer_index) + \"层ing\")\r\n\r\n            # K折交叉验证：用sklearn.cross_validation 求kf，此包已经弃用，但有n_folds参数\r\n            # 将训练数据集划分len(train_label)个互斥子集，\r\n            #       每次用其中一个子集当作验证集，剩下的len(train_label)-1个作为训练集，\r\n            #               进行len(train_label)次训练和测试，得到len(train_label)个结果\r\n            # 为了防止过拟合，我们对森林的每一层都做了K折交叉验证\r\n            # n_splits 表示划分为几块（至少是2）\r\n            # shuffle 表示是否打乱划分，默认False，即不打乱\r\n            # random_state 随机种子数,表示是否固定随机起点，Used when shuffle == True.\r\n            kf = KFold(len(train_label), n_folds=self.n_fold, shuffle=True, random_state=0)\r\n\r\n            # print(\"cross_validation求得kf:\", type(kf), kf)\r\n\r\n            # 用from sklearn.model_selection 求kf\r\n            # shuffle：在每次划分时，是否打乱\r\n            #     ①若为Falses时，其效果等同于random_state等于整数，每次划分的结果相同\r\n            #     ②若为True时，每次划分的结果都不一样，表示经过洗牌，随机取样的\r\n            # kf = KFold(len(train_label), shuffle=True, random_state=0).split(train_data.shape[0])\r\n\r\n            # 参数：森林数=2，每个森里中的树的数量=40，n_fold折交叉验证，层序号（1~20，for循环ing），步数=3\r\n            kfoldwarpper = KfoldWarpper(self.num_forests, n_estimators, self.n_fold, kf, layer_index, self.step)\r\n            # 参数：训练集、对应标签集；返回值是[预测值针对森林数取得均值， 按分类器存放的预测值]\r\n            prob, prob_concatenate = kfoldwarpper.train(train_data, train_label)\r\n\r\n            self.model.append(kfoldwarpper)\r\n            # 第一层\r\n            if layer_index == 0:\r\n                best_train_prob = prob\r\n                # 指标名称，训练标签集，阈值初值为0.5\r\n                pre_metric = compute_supervise_vec(supervise, best_train_prob, train_label, 0.5)\r\n            # 非第一层\r\n            else:\r\n                now_metric = compute_supervise_vec(supervise, prob, train_label, 0.5)\r\n                if supervise == \"average precision\" or supervise == \"macro_auc\":\r\n                    indicator = now_metric < pre_metric\r\n                else:\r\n                    indicator = now_metric > pre_metric\r\n\r\n                if np.sum(indicator) > 0:\r\n                    # 计算置信度\r\n                    confidence = self.compute_confidence(supervise, prob)\r\n                    # 取置信度均值作为阈值\r\n                    eta_t = np.mean(confidence[indicator])\r\n\r\n                    train_indicator = confidence < eta_t\r\n                    if supervise == \"hamming loss\" or supervise == \"macro_auc\":\r\n                        prob[:, train_indicator] = best_train_prob[:, train_indicator]\r\n                        prob_concatenate[:, :, train_indicator] = best_concatenate_prob[:, :, train_indicator]\r\n                    else:\r\n                        prob[train_indicator, :] = best_train_prob[train_indicator, :]\r\n                        prob_concatenate[:, train_indicator, :] = best_concatenate_prob[:, train_indicator, :]\r\n                else:\r\n                    eta_t = 0\r\n\r\n                self.eta.append(eta_t)\r\n\r\n                best_train_prob = prob\r\n\r\n                best_concatenate_prob = prob_concatenate\r\n\r\n                pre_metric = compute_supervise_vec(supervise, best_train_prob, train_label, 0.5)\r\n\r\n            value = compute_supervise(supervise, best_train_prob, train_label, 0.5)\r\n            back = compare_supervise_value(supervise, best_value, value)\r\n            if back:\r\n                bad += 1\r\n            else:\r\n                bad = 0\r\n                best_value = value\r\n            print(\"cascade测试bad：\", bad)\r\n            # 若近3层没有更新，则舍弃当前层模型和阈值\r\n            if bad >= 3:\r\n                for i in range(bad):\r\n                    self.model.pop()\r\n                    self.eta.pop()\r\n                break\r\n            # 准备下一层数据\r\n            # transpose函数：重新指定0，1，2三个轴的顺序\r\n            prob_concatenate = best_concatenate_prob.transpose((1, 0, 2))\r\n            prob_concatenate = prob_concatenate.reshape(prob_concatenate.shape[0], -1)\r\n            # 将prob_concatenate拼接到train_data_raw下面，行数会改变，所以axis=1\r\n            train_data = np.concatenate([train_data_raw.copy(), prob_concatenate], axis=1)\r\n\r\n    # 针对不同指标，对原始测试数据做预测\r\n    def predict(self, test_data_raw, supervise):\r\n        \"\"\"\r\n        :param test_data_raw: array, whose shape is (num_test_samples, num_features)\r\n        :return prob: array, whose shape is (num_test_samples, num_labels)\r\n        \"\"\"\r\n        test_data = test_data_raw.copy()\r\n        best_prob = np.empty([test_data.shape[0], self.num_labels])\r\n        best_concatenate_prob = np.empty([self.num_forests, test_data.shape[0], self.num_labels])\r\n        # zip()函数，两参数中的两迭代对象一一对应并打包成新对象的一个元素\r\n        # 遍历每层的分类器和每层的阈值\r\n        for clf, eta_t in zip(self.model, self.eta):\r\n            # 分类器预测test_data，得到[预测值针对森林数取的均值， 按分类器存放的预测值]\r\n            prob, prob_concatenate = clf.predict(test_data)\r\n            confidence = self.compute_confidence(supervise, prob)\r\n            indicator = confidence < eta_t\r\n            # print(indicator)\r\n            if supervise == \"hamming loss\" or supervise == \"macro_auc\":\r\n                prob[:, indicator] = best_prob[:, indicator]\r\n                prob_concatenate[:, :, indicator] = best_concatenate_prob[:, :, indicator]\r\n            else:\r\n                prob[indicator, :] = best_prob[indicator, :]\r\n                prob_concatenate[:, indicator, :] = best_concatenate_prob[:, indicator, :]\r\n            best_concatenate_prob = prob_concatenate\r\n            best_prob = prob\r\n            prob_concatenate = best_concatenate_prob.transpose((1, 0, 2))\r\n            prob_concatenate = prob_concatenate.reshape(prob_concatenate.shape[0], -1)\r\n            test_data = np.concatenate([test_data_raw.copy(), prob_concatenate], axis=1)\r\n        return best_prob\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- learner/cascade.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ learner/cascade.py	(date 1607420828510)
+@@ -13,7 +13,7 @@
+ 
+ class Cascade:
+     # 本实验将最大层数（T）设置为20
+-    def __init__(self, dataname, max_layer=20, num_forests=2, n_fold=5, step=3):
++    def __init__(self, dataname, max_layer=20, num_forests=4, n_fold=5, step=3):
+         """
+         :param dataname: 数据集名称
+         :param max_layer: 森林最大层数，设为20
+@@ -92,18 +92,16 @@
+         self.num_labels = train_label.shape[1]
+         # 初始化指标值，不同的指标初值不同
+         best_value = init_supervise(supervise)
++        # 统计没有改进的层数，要是近三层评估指标没有改进，则停止训练
+         bad = 0
+         # 初始化一个和train_label矩阵一样规模的矩阵，但元素不是空
+         best_train_prob = np.empty(train_label.shape)
+         # 初始化一个三维矩阵：每层的森林数、实例数、标签数
+         best_concatenate_prob = np.empty([self.num_forests, train_data.shape[0], self.num_labels])
+ 
+-        print("$" * 50)
+-
+         # max_layer = 20，遍历森林的每一层，逐层训练
+         for layer_index in range(self.max_layer):
+-            print("训练第" + str(layer_index) + "层ing")
+-
++            print("正在训练MLDF模型的第" + str(layer_index) + "层/20层")
+             # K折交叉验证：用sklearn.cross_validation 求kf，此包已经弃用，但有n_folds参数
+             # 将训练数据集划分len(train_label)个互斥子集，
+             #       每次用其中一个子集当作验证集，剩下的len(train_label)-1个作为训练集，
+@@ -112,10 +110,9 @@
+             # n_splits 表示划分为几块（至少是2）
+             # shuffle 表示是否打乱划分，默认False，即不打乱
+             # random_state 随机种子数,表示是否固定随机起点，Used when shuffle == True.
++            # 返回：kf = train_index，test_index——即训练集的索引，验证集的索引
+             kf = KFold(len(train_label), n_folds=self.n_fold, shuffle=True, random_state=0)
+ 
+-            # print("cross_validation求得kf:", type(kf), kf)
+-
+             # 用from sklearn.model_selection 求kf
+             # shuffle：在每次划分时，是否打乱
+             #     ①若为Falses时，其效果等同于random_state等于整数，每次划分的结果相同
+Index: GCForest/test.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\nfrom .gcForest import *\r\nfrom time import time\r\n\r\n\r\ndef load_data():\r\n    train_data = np.load()\r\n    train_label = np.load()\r\n    train_weight = np.load()\r\n    test_data = np.load()\r\n    test_label = np.load()\r\n    test_file = np.load()\r\n    return [train_data, train_label, train_weight, test_data, test_label, test_file]\r\n\r\n\r\nif __name__ == '__main__':\r\n    train_data, train_label, train_weight, test_data, test_label, test_file = load_data()\r\n    clf = gcForest(num_estimator=100, num_forests=4, max_layer=2, max_depth=100, n_fold=5)\r\n    start = time()\r\n    clf.train(train_data, train_label, train_weight)\r\n    end = time()\r\n    print(\"fitting time: \" + str(end - start) + \" sec\")\r\n    start = time()\r\n    prediction = clf.predict(test_data)\r\n    end = time()\r\n    print(\"prediction time: \" + str(end - start) + \" sec\")\r\n    result = {}\r\n    for index, item in enumerate(test_file):\r\n        if item not in result:\r\n            result[item] = prediction[index]\r\n        else:\r\n            result[item] = (result[item] + prediction[index]) / 2\r\n    print(result)\r\n\r\n\r\n\r\n# deep gcForest的伪代码：\r\n# input = multi_Granined Scanning 的结果\r\n# for level_i in range(num_levels):\r\n#     # level_i层处理后的结果\r\n#     result = level_i(input)\r\n#     # 更新输入向量，将本层的输入和本轮的输出拼接，作为下一层的输入\r\n#     Input = Concatenate(result, Input)\r\n#     # 对最后一层中每个Forest的结果求均值\r\n#     Score = AVE(最后一层的result)\r\n#     # 将Score中值最大的最为最终预测\r\n#     Class = MAX(Score)\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- GCForest/test.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/test.py	(date 1607393618080)
+@@ -32,8 +32,6 @@
+             result[item] = (result[item] + prediction[index]) / 2
+     print(result)
+ 
+-
+-
+ # deep gcForest的伪代码：
+ # input = multi_Granined Scanning 的结果
+ # for level_i in range(num_levels):
+@@ -45,4 +43,3 @@
+ #     Score = AVE(最后一层的result)
+ #     # 将Score中值最大的最为最终预测
+ #     Class = MAX(Score)
+-

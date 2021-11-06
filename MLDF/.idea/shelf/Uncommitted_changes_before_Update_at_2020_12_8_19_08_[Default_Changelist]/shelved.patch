@@ -1,0 +1,838 @@
+Index: GCForest/GCForest2.py
+===================================================================
+--- GCForest/GCForest2.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/GCForest2.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
+@@ -1,442 +0,0 @@
+-import itertools
+-import numpy as np
+-from sklearn.ensemble import RandomForestClassifier
+-from sklearn.model_selection import train_test_split
+-from sklearn.metrics import accuracy_score
+-
+-
+-# noinspection PyUnboundLocalVariable
+-class gcForest(object):
+-    def __init__(self, shape_1X=None, n_mgsRFtree=30, window=None, stride=1,
+-                 cascade_test_size=0.2, n_cascadeRF=2, n_cascadeRFtree=101, cascade_layer=np.inf,
+-                 min_samples_mgs=0.1, min_samples_cascade=0.05, tolerance=0.0, n_jobs=1):
+-        """ gcForest Classifier.
+-
+-        :param shape_1X: int or tuple list or np.array (default=None)
+-            Shape of a single sample element [n_lines, n_cols]. Required when calling mg_scanning!
+-            For sequence data a single int can be given.
+-
+-        :param n_mgsRFtree: int (default=30)
+-            Number of trees in a Random Forest during Multi Grain Scanning.
+-
+-        :param window: int (default=None)
+-            List of window sizes to use during Multi Grain Scanning.
+-            If 'None' no slicing will be done.
+-
+-        :param stride: int (default=1)
+-            Step used when slicing the data.
+-
+-        :param cascade_test_size: float or int (default=0.2)
+-            Split fraction or absolute number for cascade training set splitting.
+-
+-        :param n_cascadeRF: int (default=2)
+-            Number of Random Forests in a cascade layer.
+-            For each pseudo Random Forest a complete Random Forest is created, hence
+-            the total numbe of Random Forests in a layer will be 2*n_cascadeRF.
+-
+-        :param n_cascadeRFtree: int (default=101)
+-            Number of trees in a single Random Forest in a cascade layer.
+-
+-        :param min_samples_mgs: float or int (default=0.1)
+-            Minimum number of samples in a node to perform a split
+-            during the training of Multi-Grain Scanning Random Forest.
+-            If int number_of_samples = int.
+-            If float, min_samples represents the fraction of the initial n_samples to consider.
+-
+-        :param min_samples_cascade: float or int (default=0.1)
+-            Minimum number of samples in a node to perform a split
+-            during the training of Cascade Random Forest.
+-            If int number_of_samples = int.
+-            If float, min_samples represents the fraction of the initial n_samples to consider.
+-
+-        :param cascade_layer: int (default=np.inf)
+-            mMximum number of cascade layers allowed.
+-            Useful to limit the contruction of the cascade.
+-
+-        :param tolerance: float (default=0.0)
+-            Accuracy tolerance for the casacade growth.
+-            If the improvement in accuracy is not better than the tolerance the construction is
+-            stopped.
+-
+-        :param n_jobs: int (default=1)
+-            The number of jobs to run in parallel for any Random Forest fit and predict.
+-            If -1, then the number of jobs is set to the number of cores.
+-        """
+-        setattr(self, 'shape_1X', shape_1X)
+-        setattr(self, 'n_layer', 0)
+-        setattr(self, '_n_samples', 0)
+-        setattr(self, 'n_cascadeRF', int(n_cascadeRF))
+-        if isinstance(window, int):
+-            setattr(self, 'window', [window])
+-        elif isinstance(window, list):
+-            setattr(self, 'window', window)
+-        setattr(self, 'stride', stride)
+-        setattr(self, 'cascade_test_size', cascade_test_size)
+-        setattr(self, 'n_mgsRFtree', int(n_mgsRFtree))
+-        setattr(self, 'n_cascadeRFtree', int(n_cascadeRFtree))
+-        setattr(self, 'cascade_layer', cascade_layer)
+-        setattr(self, 'min_samples_mgs', min_samples_mgs)
+-        setattr(self, 'min_samples_cascade', min_samples_cascade)
+-        setattr(self, 'tolerance', tolerance)
+-        setattr(self, 'n_jobs', n_jobs)
+-
+-    def fit(self, X, y):
+-        """ Training the gcForest on input data X and associated target y.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param y: np.array
+-            1D array containing the target values.
+-            Must be of shape [n_samples]
+-        """
+-        if np.shape(X)[0] != len(y):
+-            raise ValueError('Sizes of y and X do not match.')
+-
+-        mgs_X = self.mg_scanning(X, y)
+-        _ = self.cascade_forest(mgs_X, y)
+-
+-    # 预测，计算实例X属于哪个类别的概率
+-    def predict_proba(self, X):
+-        """ Predict the class probabilities of unknown samples X.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of the same shape [n_samples, data] as the training inputs.
+-
+-        :return: np.array
+-            1D array containing the predicted class probabilities for each input sample.
+-        """
+-        mgs_X = self.mg_scanning(X)
+-        cascade_all_pred_prob = self.cascade_forest(mgs_X)
+-        predict_proba = np.mean(cascade_all_pred_prob, axis=0)
+-
+-        return predict_proba
+-
+-    # 预测未知实例X的所属类别
+-    def predict(self, X):
+-        """ Predict the class of unknown samples X.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of the same shape [n_samples, data] as the training inputs.
+-
+-        :return: np.array
+-            1D array containing the predicted class for each input sample.
+-        """
+-        pred_proba = self.predict_proba(X=X)
+-        predictions = np.argmax(pred_proba, axis=1)
+-
+-        return predictions
+-
+-    # 多粒度扫描
+-    def mg_scanning(self, X, y=None):
+-        """ Performs a Multi Grain Scanning on input data.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param y: np.array (default=None)
+-
+-        :return: np.array
+-            Array of shape [n_samples, .. ] containing Multi Grain Scanning sliced data.
+-        """
+-        setattr(self, '_n_samples', np.shape(X)[0])
+-        shape_1X = getattr(self, 'shape_1X')
+-        if isinstance(shape_1X, int):
+-            shape_1X = [1, shape_1X]
+-        if not getattr(self, 'window'):
+-            setattr(self, 'window', [shape_1X[1]])
+-
+-        mgs_pred_prob = []
+-
+-        for wdw_size in getattr(self, 'window'):
+-            wdw_pred_prob = self.window_slicing_pred_prob(X, wdw_size, shape_1X, y=y)
+-            mgs_pred_prob.append(wdw_pred_prob)
+-
+-        return np.concatenate(mgs_pred_prob, axis=1)
+-
+-    # 滑动窗口切片
+-    def window_slicing_pred_prob(self, X, window, shape_1X, y=None):
+-        """ Performs a window slicing of the input data and send them through Random Forests.
+-        If target values 'y' are provided sliced data are then used to train the Random Forests.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param window: int
+-            Size of the window to use for slicing.
+-
+-        :param shape_1X: list or np.array
+-            Shape of a single sample.
+-
+-        :param y: np.array (default=None)
+-            Target values. If 'None' no training is done.
+-
+-        :return: np.array
+-            Array of size [n_samples, ..] containing the Random Forest.
+-            prediction probability for each input sample.
+-        """
+-        n_tree = getattr(self, 'n_mgsRFtree')
+-        min_samples = getattr(self, 'min_samples_mgs')
+-        stride = getattr(self, 'stride')
+-
+-        if shape_1X[0] > 1:
+-            print('Slicing Images...')
+-            sliced_X, sliced_y = self._window_slicing_img(X, window, shape_1X, y=y, stride=stride)
+-        else:
+-            print('Slicing Sequence...')
+-            sliced_X, sliced_y = self._window_slicing_sequence(X, window, shape_1X, y=y, stride=stride)
+-
+-        if y is not None:
+-            n_jobs = getattr(self, 'n_jobs')
+-            prf = RandomForestClassifier(n_estimators=n_tree, max_features='sqrt',
+-                                         min_samples_split=min_samples, oob_score=True, n_jobs=n_jobs)
+-            crf = RandomForestClassifier(n_estimators=n_tree, max_features=1,
+-                                         min_samples_split=min_samples, oob_score=True, n_jobs=n_jobs)
+-            print('Training MGS Random Forests...')
+-            prf.fit(sliced_X, sliced_y)
+-            crf.fit(sliced_X, sliced_y)
+-            setattr(self, '_mgsprf_{}'.format(window), prf)
+-            setattr(self, '_mgscrf_{}'.format(window), crf)
+-            pred_prob_prf = prf.oob_decision_function_
+-            pred_prob_crf = crf.oob_decision_function_
+-
+-        if hasattr(self, '_mgsprf_{}'.format(window)) and y is None:
+-            prf = getattr(self, '_mgsprf_{}'.format(window))
+-            crf = getattr(self, '_mgscrf_{}'.format(window))
+-            pred_prob_prf = prf.predict_proba(sliced_X)
+-            pred_prob_crf = crf.predict_proba(sliced_X)
+-
+-        pred_prob = np.c_[pred_prob_prf, pred_prob_crf]
+-
+-        return pred_prob.reshape([getattr(self, '_n_samples'), -1])
+-
+-    def _window_slicing_img(self, X, window, shape_1X, y=None, stride=1):
+-        """ Slicing procedure for images
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param window: int
+-            Size of the window to use for slicing.
+-
+-        :param shape_1X: list or np.array
+-            Shape of a single sample [n_lines, n_cols].
+-
+-        :param y: np.array (default=None)
+-            Target values.
+-
+-        :param stride: int (default=1)
+-            Step used when slicing the data.
+-
+-        :return: np.array and np.array
+-            Arrays containing the sliced images and target values (empty if 'y' is None).
+-        """
+-        if any(s < window for s in shape_1X):
+-            raise ValueError('window must be smaller than both dimensions for an image')
+-
+-        len_iter_x = np.floor_divide((shape_1X[1] - window), stride) + 1
+-        len_iter_y = np.floor_divide((shape_1X[0] - window), stride) + 1
+-        iterx_array = np.arange(0, stride * len_iter_x, stride)
+-        itery_array = np.arange(0, stride * len_iter_y, stride)
+-
+-        ref_row = np.arange(0, window)
+-        ref_ind = np.ravel([ref_row + shape_1X[1] * i for i in range(window)])
+-        inds_to_take = [ref_ind + ix + shape_1X[1] * iy
+-                        for ix, iy in itertools.product(iterx_array, itery_array)]
+-
+-        sliced_imgs = np.take(X, inds_to_take, axis=1).reshape(-1, window ** 2)
+-
+-        if y is not None:
+-            sliced_target = np.repeat(y, len_iter_x * len_iter_y)
+-        elif y is None:
+-            sliced_target = None
+-
+-        return sliced_imgs, sliced_target
+-
+-    def _window_slicing_sequence(self, X, window, shape_1X, y=None, stride=1):
+-        """ Slicing procedure for sequences (aka shape_1X = [.., 1]).
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param window: int
+-            Size of the window to use for slicing.
+-
+-        :param shape_1X: list or np.array
+-            Shape of a single sample [n_lines, n_col].
+-
+-        :param y: np.array (default=None)
+-            Target values.
+-
+-        :param stride: int (default=1)
+-            Step used when slicing the data.
+-
+-        :return: np.array and np.array
+-            Arrays containing the sliced sequences and target values (empty if 'y' is None).
+-        """
+-        if shape_1X[1] < window:
+-            raise ValueError('window must be smaller than the sequence dimension')
+-
+-        len_iter = np.floor_divide((shape_1X[1] - window), stride) + 1
+-        iter_array = np.arange(0, stride * len_iter, stride)
+-
+-        ind_1X = np.arange(np.prod(shape_1X))
+-        inds_to_take = [ind_1X[i:i + window] for i in iter_array]
+-        sliced_sqce = np.take(X, inds_to_take, axis=1).reshape(-1, window)
+-
+-        if y is not None:
+-            sliced_target = np.repeat(y, len_iter)
+-        elif y is None:
+-            sliced_target = None
+-
+-        return sliced_sqce, sliced_target
+-
+-    # 级联森林
+-    def cascade_forest(self, X, y=None):
+-        """ Perform (or train if 'y' is not None) a cascade forest estimator.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param y: np.array (default=None)
+-            Target values. If 'None' perform training.
+-
+-        :return: np.array
+-            1D array containing the predicted class for each input sample.
+-        """
+-        if y is not None:
+-            setattr(self, 'n_layer', 0)
+-            test_size = getattr(self, 'cascade_test_size')
+-            max_layers = getattr(self, 'cascade_layer')
+-            tol = getattr(self, 'tolerance')
+-
+-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+-
+-            self.n_layer += 1
+-            prf_crf_pred_ref = self._cascade_layer(X_train, y_train)
+-            accuracy_ref = self._cascade_evaluation(X_test, y_test)
+-            feat_arr = self._create_feat_arr(X_train, prf_crf_pred_ref)
+-
+-            self.n_layer += 1
+-            prf_crf_pred_layer = self._cascade_layer(feat_arr, y_train)
+-            accuracy_layer = self._cascade_evaluation(X_test, y_test)
+-
+-            while accuracy_layer > (accuracy_ref + tol) and self.n_layer <= max_layers:
+-                accuracy_ref = accuracy_layer
+-                prf_crf_pred_ref = prf_crf_pred_layer
+-                feat_arr = self._create_feat_arr(X_train, prf_crf_pred_ref)
+-                self.n_layer += 1
+-                prf_crf_pred_layer = self._cascade_layer(feat_arr, y_train)
+-                accuracy_layer = self._cascade_evaluation(X_test, y_test)
+-
+-            if accuracy_layer < accuracy_ref:
+-                n_cascadeRF = getattr(self, 'n_cascadeRF')
+-                for irf in range(n_cascadeRF):
+-                    delattr(self, '_casprf{}_{}'.format(self.n_layer, irf))
+-                    delattr(self, '_cascrf{}_{}'.format(self.n_layer, irf))
+-                self.n_layer -= 1
+-
+-        elif y is None:
+-            at_layer = 1
+-            prf_crf_pred_ref = self._cascade_layer(X, layer=at_layer)
+-            while at_layer < getattr(self, 'n_layer'):
+-                at_layer += 1
+-                feat_arr = self._create_feat_arr(X, prf_crf_pred_ref)
+-                prf_crf_pred_ref = self._cascade_layer(feat_arr, layer=at_layer)
+-
+-        return prf_crf_pred_ref
+-
+-    def _cascade_layer(self, X, y=None, layer=0):
+-        """ Cascade layer containing Random Forest estimators.
+-        If y is not None the layer is trained.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param y: np.array (default=None)
+-            Target values. If 'None' perform training.
+-
+-        :param layer: int (default=0)
+-            Layer indice. Used to call the previously trained layer.
+-
+-        :return: list
+-            List containing the prediction probabilities for all samples.
+-        """
+-        n_tree = getattr(self, 'n_cascadeRFtree')
+-        n_cascadeRF = getattr(self, 'n_cascadeRF')
+-        min_samples = getattr(self, 'min_samples_cascade')
+-
+-        n_jobs = getattr(self, 'n_jobs')
+-        prf = RandomForestClassifier(n_estimators=n_tree, max_features='sqrt',
+-                                     min_samples_split=min_samples, oob_score=True, n_jobs=n_jobs)
+-        crf = RandomForestClassifier(n_estimators=n_tree, max_features=1,
+-                                     min_samples_split=min_samples, oob_score=True, n_jobs=n_jobs)
+-
+-        prf_crf_pred = []
+-        if y is not None:
+-            print('Adding/Training Layer, n_layer={}'.format(self.n_layer))
+-            for irf in range(n_cascadeRF):
+-                prf.fit(X, y)
+-                crf.fit(X, y)
+-                setattr(self, '_casprf{}_{}'.format(self.n_layer, irf), prf)
+-                setattr(self, '_cascrf{}_{}'.format(self.n_layer, irf), crf)
+-                prf_crf_pred.append(prf.oob_decision_function_)
+-                prf_crf_pred.append(crf.oob_decision_function_)
+-        elif y is None:
+-            for irf in range(n_cascadeRF):
+-                prf = getattr(self, '_casprf{}_{}'.format(layer, irf))
+-                crf = getattr(self, '_cascrf{}_{}'.format(layer, irf))
+-                prf_crf_pred.append(prf.predict_proba(X))
+-                prf_crf_pred.append(crf.predict_proba(X))
+-
+-        return prf_crf_pred
+-
+-    def _cascade_evaluation(self, X_test, y_test):
+-        """ Evaluate the accuracy of the cascade using X and y.
+-
+-        :param X_test: np.array
+-            Array containing the test input samples.
+-            Must be of the same shape as training data.
+-
+-        :param y_test: np.array
+-            Test target values.
+-
+-        :return: float
+-            the cascade accuracy.
+-        """
+-        casc_pred_prob = np.mean(self.cascade_forest(X_test), axis=0)
+-        casc_pred = np.argmax(casc_pred_prob, axis=1)
+-        casc_accuracy = accuracy_score(y_true=y_test, y_pred=casc_pred)
+-        print('Layer validation accuracy = {}'.format(casc_accuracy))
+-
+-        return casc_accuracy
+-
+-    def _create_feat_arr(self, X, prf_crf_pred):
+-        """ Concatenate the original feature vector with the predicition probabilities
+-        of a cascade layer.
+-
+-        :param X: np.array
+-            Array containing the input samples.
+-            Must be of shape [n_samples, data] where data is a 1D array.
+-
+-        :param prf_crf_pred: list
+-            Prediction probabilities by a cascade layer for X.
+-
+-        :return: np.array
+-            Concatenation of X and the predicted probabilities.
+-            To be used for the next layer in a cascade forest.
+-        """
+-        swap_pred = np.swapaxes(prf_crf_pred, 0, 1)
+-        add_feat = swap_pred.reshape([np.shape(X)[0], -1])
+-        feat_arr = np.concatenate([add_feat, X], axis=1)
+-
+-        return feat_arr
+Index: GCForest/layer.py
+===================================================================
+--- GCForest/layer.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/layer.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
+@@ -1,97 +0,0 @@
+-from sklearn.ensemble import ExtraTreesRegressor  # 引入极端森林回归
+-from sklearn.ensemble import RandomForestRegressor  # 引入随机森林回归
+-import numpy as np
+-
+-# 定义层类
+-class Layer:
+-    def __init__(self, n_estimators, num_forests, max_depth=30, min_samples_leaf=1):
+-        self.num_forests = num_forests  # 定义森林数
+-        self.n_estimators = n_estimators  # 每个森林的树个数
+-        self.max_depth = max_depth  # 每一颗树的最大深度
+-        self.min_samples_leaf = min_samples_leaf  # 树会生长到所有叶子都分到一个类，或者某节点所代表的样本数已小于min_samples_leaf
+-        self.model = []  # 最后产生的类向量
+-
+-    def train(self, train_data, train_label, weight, val_data):  # 训练函数
+-        val_prob = np.zeros([self.num_forests, val_data.shape[
+-            0]])  # 定义出该层的类向量，有self.num_forersts行，val_data.shape[0]列，这里我们认为val_data应该就是我们的weight
+-
+-        for forest_index in range(self.num_forests):  # 对具体的layer内的森林进行构建
+-            if forest_index % 2 == 0:  # 如果是第偶数个，设为随机森林
+-                clf = RandomForestRegressor(n_estimators=self.n_estimators,  # 子树的个数,
+-                                            n_jobs=-1,  # cpu并行树，-1表示和cpu的核数相同
+-                                            max_depth=self.max_depth,  # 最大深度
+-                                            min_samples_leaf=self.min_samples_leaf)
+-                clf.fit(train_data, train_label, weight)  # weight是取样比重Sample weights
+-                val_prob[forest_index, :] = clf.predict(val_data)  # 记录类向量
+-            else:  # 如果是第奇数个，就设为极端森林
+-                clf = ExtraTreesRegressor(n_estimators=self.n_estimators,  # 森林所含树的个数
+-                                          n_jobs=-1,  # 并行数
+-                                          max_depth=self.max_depth,  # 最大深度
+-                                          min_samples_leaf=self.min_samples_leaf)  # 最小叶子限制
+-                clf.fit(train_data, train_label, weight)
+-                val_prob[forest_index, :] = clf.predict(val_data)  # 记录类向量
+-
+-            self.model.append(clf)  # 组建layer层
+-
+-        val_avg = np.sum(val_prob, axis=0)  # 按列进行求和
+-        val_avg /= self.num_forests  # 求平均
+-        val_concatenate = val_prob.transpose((1, 0))  # 对记录的类向量矩阵进行转置
+-        return [val_avg, val_concatenate]  # 返回平均结果和转置后的类向量矩阵
+-
+-    def predict(self, test_data):  # 定义预测函数，也是最后一层的功能
+-        predict_prob = np.zeros([self.num_forests, test_data.shape[0]])
+-        for forest_index, clf in enumerate(self.model):
+-            predict_prob[forest_index, :] = clf.predict(test_data)
+-
+-        predict_avg = np.sum(predict_prob, axis=0)
+-        predict_avg /= self.num_forests
+-        predict_concatenate = predict_prob.transpose((1, 0))
+-        return [predict_avg, predict_concatenate]
+-
+-
+-class KfoldWarpper:  # 定义每个树进行训练的所用的数据
+-    def __init__(self, num_forests, n_estimators, n_fold, kf, layer_index, max_depth=31,
+-                 min_samples_leaf=1):  # 包括森林树，森林使用树的个数，k折的个数，k-折交叉验证，第几层，最大深度，最小叶子节点限制
+-        self.num_forests = num_forests
+-        self.n_estimators = n_estimators
+-        self.n_fold = n_fold
+-        self.kf = kf
+-        self.layer_index = layer_index
+-        self.max_depth = max_depth
+-        self.min_samples_leaf = min_samples_leaf
+-        self.model = []
+-
+-    def train(self, train_data, train_label, weight):
+-        num_samples, num_features = train_data.shape
+-
+-        val_prob = np.empty([num_samples])
+-        # 创建新的空矩阵，num_samples行，num_forest列，用于放置预测结果
+-        val_prob_concatenate = np.empty([num_samples, self.num_forests])
+-
+-        for train_index, test_index in self.kf:  # 进行k折交叉验证，在train_data里创建交叉验证的补充
+-            X_train = train_data[train_index, :]  # 选出训练集
+-            X_val = train_data[test_index, :]  # 验证集
+-            y_train = train_label[train_index]  # 训练标签
+-            weight_train = weight[train_index]  # 训练集对应的权重
+-
+-            # 加入层
+-            layer = Layer(self.n_estimators, self.num_forests, self.max_depth, self.min_samples_leaf)
+-            # 记录输出的结果
+-            val_prob[test_index], val_prob_concatenate[test_index, :] = layer.train(X_train, y_train, weight_train, X_val)
+-            self.model.append(layer)  # 在模型中填充层级，这也是导致程序吃资源的部分，每次进行
+-        return [val_prob, val_prob_concatenate]
+-
+-    def predict(self, test_data):  # 定义预测函数，用做下一层的训练数据
+-
+-        test_prob = np.zeros([test_data.shape[0]])
+-        test_prob_concatenate = np.zeros([test_data.shape[0], self.num_forests])
+-        for layer in self.model:
+-            temp_prob, temp_prob_concatenate = \
+-                layer.predict(test_data)
+-
+-            test_prob += temp_prob
+-            test_prob_concatenate += temp_prob_concatenate
+-        test_prob /= self.n_fold
+-        test_prob_concatenate /= self.n_fold
+-
+-        return [test_prob, test_prob_concatenate]
+Index: GCForest/test.py
+===================================================================
+--- GCForest/test.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/test.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
+@@ -1,48 +0,0 @@
+-import numpy as np
+-from .gcForest import *
+-from time import time
+-
+-
+-def load_data():
+-    train_data = np.load()
+-    train_label = np.load()
+-    train_weight = np.load()
+-    test_data = np.load()
+-    test_label = np.load()
+-    test_file = np.load()
+-    return [train_data, train_label, train_weight, test_data, test_label, test_file]
+-
+-
+-if __name__ == '__main__':
+-    train_data, train_label, train_weight, test_data, test_label, test_file = load_data()
+-    clf = gcForest(num_estimator=100, num_forests=4, max_layer=2, max_depth=100, n_fold=5)
+-    start = time()
+-    clf.train(train_data, train_label, train_weight)
+-    end = time()
+-    print("fitting time: " + str(end - start) + " sec")
+-    start = time()
+-    prediction = clf.predict(test_data)
+-    end = time()
+-    print("prediction time: " + str(end - start) + " sec")
+-    result = {}
+-    for index, item in enumerate(test_file):
+-        if item not in result:
+-            result[item] = prediction[index]
+-        else:
+-            result[item] = (result[item] + prediction[index]) / 2
+-    print(result)
+-
+-
+-
+-# deep gcForest的伪代码：
+-# input = multi_Granined Scanning 的结果
+-# for level_i in range(num_levels):
+-#     # level_i层处理后的结果
+-#     result = level_i(input)
+-#     # 更新输入向量，将本层的输入和本轮的输出拼接，作为下一层的输入
+-#     Input = Concatenate(result, Input)
+-#     # 对最后一层中每个Forest的结果求均值
+-#     Score = AVE(最后一层的result)
+-#     # 将Score中值最大的最为最终预测
+-#     Class = MAX(Score)
+-
+Index: learner/MLKNN.py
+===================================================================
+--- learner/MLKNN.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ learner/MLKNN.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
+@@ -1,130 +0,0 @@
+-import numpy as np
+-import pandas as pd
+-
+-
+-def mlknn(train, test, id, label_columns, k):
+-    smooth = 1.0
+-    # 计算每个标签出现的概率
+-    phj = {}
+-    for label in label_columns:
+-        phj[label] = (smooth + train[train[label] == 1].shape[0]) / (smooth * 2 + train.shape[0])
+-
+-    train_ids = train[id].values
+-    tmp_train = train.drop(label_columns + [id], axis=1)
+-    test_ids = test[id].values
+-    test_labels = test[label_columns]
+-    tmp_test = test.drop(label_columns + [id], axis=1)
+-    data_columns = tmp_train.columns
+-
+-    # 计算训练集每个样本之间的相似度，并保存跟每个样本最相似的K个样本
+-    knn_records_train = {}
+-    cos_train = {}
+-    for i in range(tmp_train.shape[0]):
+-        record = tmp_train.iloc[i]
+-        norm = np.linalg.norm(record)
+-        cos_train[train_ids[i]] = {}
+-
+-        for j in range(tmp_train.shape[0]):
+-            if cos_train.has_key(train_ids[j]) and cos_train[train_ids[j]].has_key(train_ids[i]):
+-                cos_train[train_ids[i]][train_ids[j]] = cos_train[train_ids[j]][train_ids[i]]
+-            else:
+-                cos = np.dot(record, tmp_train.iloc[j]) / (norm * np.linalg.norm(tmp_train.iloc[j]))
+-                cos_train[train_ids[i]][train_ids[j]] = cos
+-        topk = sorted(cos_train[train_ids[i]].items(), key=lambda item: item[1], reverse=True)[0:k]
+-        knn_records_train[train_ids[i]] = [item[0] for item in topk]
+-
+-    kjr = {}
+-    not_kjr = {}
+-    for label in label_columns:
+-        kjr[label] = {}
+-        not_kjr[label] = {}
+-        for m in range(train.shape[0]):
+-            record = train.iloc[m]
+-            if record[label] == 1:
+-                # 计算标签为1并且相邻K个样本中标签也为1的样本个数
+-                r = 0
+-                for rec_id in knn_records_train[train_ids[m]]:
+-                    if train[train[id] == rec_id][label].values[0] == 1:
+-                        r += 1
+-                if not kjr[label].has_key(r):
+-                    kjr[label][r] = 1
+-                else:
+-                    kjr[label][r] += 1
+-            else:
+-                # 计算标签为0并且相邻K个样本中标签也为1的样本个数
+-                r = 0
+-                for rec_id in knn_records_train[train_ids[m]]:
+-                    if train[train[id] == rec_id][label].values[0] == 1:
+-                        r += 1
+-                if not not_kjr[label].has_key(r):
+-                    not_kjr[label][r] = 1
+-                else:
+-                    not_kjr[label][r] += 1
+-
+-    # 计算当前样本标签为1条件下，K个近邻样本中标签为1个数为Cj的概率
+-    pcjhj = {}
+-    for label in label_columns:
+-        pcjhj[label] = {}
+-        for L in range(k + 1):
+-            if kjr[label].has_key(L):
+-                pcjhj[label][L] = (smooth + kjr[label][L]) / (smooth * (k + 1) + sum(kjr[label].values()))
+-            else:
+-                pcjhj[label][L] = (smooth + 0) / (smooth * (k + 1) + sum(kjr[label].values()))
+-
+-    # 计算当前样本标签为0条件下，K个近邻样本中标签为1个数为Cj的概率
+-    not_pcjhj = {}
+-    for label in label_columns:
+-        not_pcjhj[label] = {}
+-        for L in range(k + 1):
+-            if not_kjr[label].has_key(L):
+-                not_pcjhj[label][L] = (smooth + not_kjr[label][L]) / (smooth * (k + 1) + sum(not_kjr[label].values()))
+-            else:
+-                not_pcjhj[label][L] = (smooth + 0) / (smooth * (k + 1) + sum(not_kjr[label].values()))
+-
+-    # 计算测试集中每个样本与训练集样本之间的相似度，并保存跟每个样本最相似的K个样本
+-    knn_records_test = {}
+-    cos_test = {}
+-    for i in range(tmp_test.shape[0]):
+-        record = tmp_test.iloc[i]
+-        norm = np.linalg.norm(record)
+-        cos_test[test_ids[i]] = {}
+-
+-        for j in range(tmp_train.shape[0]):
+-            cos = np.dot(record, tmp_train.iloc[j]) / (norm * np.linalg.norm(tmp_train.iloc[j]))
+-            cos_test[test_ids[i]][train_ids[j]] = cos
+-        topk = sorted(cos_test[test_ids[i]].items(), key=lambda item: item[1], reverse=True)[0:k]
+-        knn_records_test[test_ids[i]] = [item[0] for item in topk]
+-
+-    pred_test_labels = {}
+-    correct_rec = 0
+-    for i in range(tmp_test.shape[0]):
+-        record = tmp_test.iloc[i]
+-        correct_col = 0
+-        for label in label_columns:
+-            if not pred_test_labels.has_key(label):
+-                pred_test_labels[label] = []
+-            # 计算每个测试样本K近邻中标签为1的个数
+-            cj = 0
+-            for rec_id in knn_records_test[test_ids[i]]:
+-                if train[train[id] == rec_id][label].values[0] == 1:
+-                    cj += 1
+-            # 计算包含Cj个标签为1的K近邻条件下，该测试样本标签为1的概率
+-            phjcj = phj[label] * pcjhj[label][cj]
+-            # 计算包含Cj个标签为1的K近邻条件下，该测试样本标签为0的概率
+-            not_phjcj = (1 - phj[label]) * not_pcjhj[label][cj]
+-
+-            if phjcj > not_phjcj:
+-                pred_test_labels[label].append(1)
+-                pred_label = 1
+-            else:
+-                pred_test_labels[label].append(0)
+-                pred_label = 0
+-            if pred_label == test_labels[label].values[i]:
+-                correct_col += 1
+-        if correct_col == len(label_columns):
+-            correct_rec += 1
+-    print('测试集标签识别准确率', correct_rec * 1.0 / test.shape[0])
+-
+-
+-if __name__ == '__main__':
+-    s = mlknn()
+Index: GCForest/gcForest.py
+===================================================================
+--- GCForest/gcForest.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ GCForest/gcForest.py	(revision 3644eedc425028d40d752162e54195458b8c4596)
+@@ -1,82 +0,0 @@
+-from sklearn.model_selection import KFold
+-from .layer import *
+-import numpy as np
+-
+-# deep gcForest的伪代码：
+-# input = multi_Granined Scanning 的结果
+-# for level_i in range(num_levels):
+-#     # level_i层处理后的结果
+-#     result = level_i(input)
+-#     # 更新输入向量，将本层的输入和本轮的输出拼接，作为下一层的输入
+-#     Input = Concatenate(result, Input)
+-#     # 对最后一层中每个Forest的结果求均值
+-#     Score = AVE(最后一层的result)
+-#     # 将Score中值最大的最为最终预测
+-#     Class = MAX(Score)
+-
+-def compute_loss(target, predict):  # 对数误差函数
+-    temp = np.log(abs(target + 1)) - np.log(abs(predict + 1))
+-    res = np.dot(temp, temp) / len(temp)  # 向量点乘后平均
+-    return res
+-
+-# 定义gcforest模型
+-class gcForest:
+-    def __init__(self, num_estimator, num_forests, max_layer=2, max_depth=31, n_fold=5):
+-        self.num_estimator = num_estimator#每个森林中树的数量
+-        self.num_forests = num_forests#森林数量
+-        self.n_fold = n_fold
+-        self.max_depth = max_depth
+-        self.max_layer = max_layer
+-        self.model = []
+-
+-    def train(self, train_data, train_label, weight):
+-        num_samples, num_features = train_data.shape
+-
+-        # basis process
+-        train_data_new = train_data.copy()
+-
+-        # return value
+-        val_p = []
+-        best_train_loss = 0.0
+-        layer_index = 0
+-        best_layer_index = 0
+-        bad = 0
+-
+-        kf = KFold(2, True, self.n_fold).split(train_data_new.shape[0])
+-        # 这里加入k折交叉验证
+-        while layer_index < self.max_layer:
+-
+-            print("layer " + str(layer_index))
+-            # 其实这一个layer是个夹心layer，是2层layer的平均结果
+-            layer = KfoldWarpper(self.num_forests, self.num_estimator, self.n_fold, kf, layer_index, self.max_depth, 1)
+-            val_prob, val_stack = layer.train(train_data_new, train_label, weight)
+-
+-            # 使用该层进行训练
+-            train_data_new = np.concatenate([train_data, val_stack], axis=1)
+-            # 将该层的训练结果也加入到train_data中
+-            temp_val_loss = compute_loss(train_label, val_prob)
+-            print("val   loss:" + str(temp_val_loss))
+-
+-            if best_train_loss < temp_val_loss:  # 用于控制加入的层数，如果加入的层数较多，且误差没有下降也停止运行
+-                bad += 1
+-            else:
+-                bad = 0
+-                best_train_loss = temp_val_loss
+-                best_layer_index = layer_index
+-            if bad >= 3:
+-                break
+-
+-            layer_index = layer_index + 1
+-
+-            self.model.append(layer)
+-
+-        for index in range(len(self.model), best_layer_index + 1, -1):  # 删除多余的layer
+-            self.model.pop()
+-
+-    def predict(self, test_data):
+-        test_data_new = test_data.copy()
+-        test_prob = []
+-        for layer in self.model:
+-            predict, test_stack = layer.predict(test_data_new)
+-            test_data_new = np.concatenate([test_data, test_stack], axis=1)
+-        return predict
+Index: README.md
+===================================================================
+--- README.md	(revision 3644eedc425028d40d752162e54195458b8c4596)
++++ README.md	(revision 3644eedc425028d40d752162e54195458b8c4596)
+@@ -1,9 +0,0 @@
+-# MLDF
+-论文出处：出处：Yang L , Wu X Z , Jiang Y , et al. Multi-Label Learning with Deep Forest[J]. 2019.
+-
+-
+-本篇论文主要学习算法的第一部分：特征重用机制。
+-当前层求置信度，与阈值比较，小于某一标准，则重用上一层的表示。
+-
+-
+-作者邮箱：yangl@lamda.nju.edu.cn

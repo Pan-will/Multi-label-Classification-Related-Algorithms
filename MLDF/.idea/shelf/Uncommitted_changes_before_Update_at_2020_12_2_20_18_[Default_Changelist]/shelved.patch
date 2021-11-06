@@ -1,0 +1,46 @@
+Index: Iris/test.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>print(0 & 0, 0 or 0, 0 | 0, 0 and 0)\r\nprint(0 & 1, 1 & 1)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Iris/test.py	(revision 8018a5ae37ff9389bef48209b13967e2938b39dd)
++++ Iris/test.py	(date 1606479902068)
+@@ -1,2 +1,4 @@
+ print(0 & 0, 0 or 0, 0 | 0, 0 and 0)
+ print(0 & 1, 1 & 1)
++
++
+Index: GCForest/gcForest.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from sklearn.model_selection import KFold\r\nfrom .layer import *\r\nimport numpy as np\r\n\r\n# deep gcForest的伪代码：\r\n# input = multi_Granined Scanning 的结果\r\n# for level_i in range(num_levels):\r\n#     # level_i层处理后的结果\r\n#     result = level_i(input)\r\n#     # 更新输入向量，将本层的输入和本轮的输出拼接，作为下一层的输入\r\n#     Input = Concatenate(result, Input)\r\n#     # 对最后一层中每个Forest的结果求均值\r\n#     Score = AVE(最后一层的result)\r\n#     # 将Score中值最大的最为最终预测\r\n#     Class = MAX(Score)\r\n\r\ndef compute_loss(target, predict):  # 对数误差函数\r\n    temp = np.log(abs(target + 1)) - np.log(abs(predict + 1))\r\n    res = np.dot(temp, temp) / len(temp)  # 向量点乘后平均\r\n    return res\r\n\r\n# 定义gcforest模型\r\nclass gcForest:\r\n    def __init__(self, num_estimator, num_forests, max_layer=2, max_depth=31, n_fold=5):\r\n        self.num_estimator = num_estimator#每个森林中树的数量\r\n        self.num_forests = num_forests#森林数量\r\n        self.n_fold = n_fold\r\n        self.max_depth = max_depth\r\n        self.max_layer = max_layer\r\n        self.model = []\r\n\r\n    def train(self, train_data, train_label, weight):\r\n        num_samples, num_features = train_data.shape\r\n\r\n        # basis process\r\n        train_data_new = train_data.copy()\r\n\r\n        # return value\r\n        val_p = []\r\n        best_train_loss = 0.0\r\n        layer_index = 0\r\n        best_layer_index = 0\r\n        bad = 0\r\n\r\n        kf = KFold(2, True, self.n_fold).split(train_data_new.shape[0])\r\n        # 这里加入k折交叉验证\r\n        while layer_index < self.max_layer:\r\n\r\n            print(\"layer \" + str(layer_index))\r\n            # 其实这一个layer是个夹心layer，是2层layer的平均结果\r\n            layer = KfoldWarpper(self.num_forests, self.num_estimator, self.n_fold, kf, layer_index, self.max_depth, 1)\r\n            val_prob, val_stack = layer.train(train_data_new, train_label, weight)\r\n\r\n            # 使用该层进行训练\r\n            train_data_new = np.concatenate([train_data, val_stack], axis=1)\r\n            # 将该层的训练结果也加入到train_data中\r\n            temp_val_loss = compute_loss(train_label, val_prob)\r\n            print(\"val   loss:\" + str(temp_val_loss))\r\n\r\n            if best_train_loss < temp_val_loss:  # 用于控制加入的层数，如果加入的层数较多，且误差没有下降也停止运行\r\n                bad += 1\r\n            else:\r\n                bad = 0\r\n                best_train_loss = temp_val_loss\r\n                best_layer_index = layer_index\r\n            if bad >= 3:\r\n                break\r\n\r\n            layer_index = layer_index + 1\r\n\r\n            self.model.append(layer)\r\n\r\n        for index in range(len(self.model), best_layer_index + 1, -1):  # 删除多余的layer\r\n            self.model.pop()\r\n\r\n    def predict(self, test_data):\r\n        test_data_new = test_data.copy()\r\n        test_prob = []\r\n        for layer in self.model:\r\n            predict, test_stack = layer.predict(test_data_new)\r\n            test_data_new = np.concatenate([test_data, test_stack], axis=1)\r\n        return predict\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- GCForest/gcForest.py	(revision 8018a5ae37ff9389bef48209b13967e2938b39dd)
++++ GCForest/gcForest.py	(date 1606911479827)
+@@ -2,6 +2,7 @@
+ from .layer import *
+ import numpy as np
+ 
++
+ # deep gcForest的伪代码：
+ # input = multi_Granined Scanning 的结果
+ # for level_i in range(num_levels):
+@@ -19,11 +20,12 @@
+     res = np.dot(temp, temp) / len(temp)  # 向量点乘后平均
+     return res
+ 
++
+ # 定义gcforest模型
+ class gcForest:
+     def __init__(self, num_estimator, num_forests, max_layer=2, max_depth=31, n_fold=5):
+-        self.num_estimator = num_estimator#每个森林中树的数量
+-        self.num_forests = num_forests#森林数量
++        self.num_estimator = num_estimator  # 每个森林中树的数量
++        self.num_forests = num_forests  # 森林数量
+         self.n_fold = n_fold
+         self.max_depth = max_depth
+         self.max_layer = max_layer

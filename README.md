@@ -7,33 +7,25 @@
 
 
 
-## 1、Hoeffding Tree
+## 8、MLDF
 
-基于决策树，可用作单标签、多标签数据分类和预测，项目中仅提供了实现霍夫丁树的算法，没有做具体的模型训练，也没有具体实验。可以拿来改编。
+论文出处：Yang L , Wu X Z , Jiang Y , et al. Multi-Label Learning with Deep Forest[J]. 2019.
 
+南京大学周志华教授团队的力作，是深度森林的变体及应用。
 
+MLDF是多标签数据分类算法，模型是静态批量式学习。
 
-## 2、MyBlog
-
-非数据分类算法，仅是学Django框架时写的一个Python版web项目，或许可用于本科课设。
-
-
-
-## 3、NeuralNetworksDemos
-
-非数据分类算法，仅是学神经网络初期写的几个小demo。比如MNIST数据分类，滑动平均模型。
+实验中用到的数据集全都可以在  http://mulan.sourceforge.net/datasets-mlc.html  下载。
 
 
 
-## 4、Hybrid_Forest
-
-来自论文：Hybrid Forest: A Concept Drift Aware Data Stream Mining Algorithm
-
-模型可以跑，效果凑合，实验中用的对比算法太少了。
+## 7、gcForest：深度森林
 
 
 
-## 5、BatchMultiLabelClassifier
+
+
+## 6、BatchMultiLabelClassifier
 
 流场景、多标签分类算法，主要还是基于霍夫丁树的改编。
 
@@ -47,9 +39,47 @@
 
 
 
-## 6、MLKNN
+## 5、Hybrid_Forest
+
+来自论文：Hybrid Forest: A Concept Drift Aware Data Stream Mining Algorithm
+
+模型可以跑，效果凑合，实验中用的对比算法太少了。
+
+
+
+## 4、MLKNN
 
 很牛逼的一个多标签分类算法，后面的什么级联模型、深度森林模型，在one-error、汉明损失、精度等几个指标 上，就没有比得过MLKNN的，KNN  yyds~。
 
-这里是MATLAB版代码，后面在更新Python版吧。
+这里是MATLAB版代码，后面再更新Python版吧。
+
+
+
+## 3、Hoeffding Tree
+
+基于决策树，可用作单标签、多标签数据分类和预测，项目中仅提供了实现霍夫丁树的算法，没有做具体的模型训练，也没有具体实验。可以拿来改编。
+
+
+
+## 2、MyBlog
+
+非数据分类算法，仅是学Django框架时写的一个Python版web项目，或许可用于本科课设。
+
+
+
+## 1、NeuralNetworksDemos
+
+非数据分类算法，仅是学神经网络初期写的几个小demo。比如MNIST数据分类，滑动平均模型。
+
+
+
+
+
+
+
+
+
+
+
+
 

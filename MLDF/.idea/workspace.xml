@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cec61da5-1ad3-41a4-a53f-070dcd1d1297" name="Default Changelist" comment="最新提交">
+      <change afterPath="$PROJECT_DIR$/MLDF - 基于深度森林的多标签学习.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestBirds.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCorel5K.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestMediamill5K.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dataset/Corel5k_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dataset/Corel5k_label.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dataset/birds_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dataset/birds_label.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dataset/mediamill5K_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dataset/mediamill5K_label.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GCForest/GCForest2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/GCForest/gcForest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/GCForest/layer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/GCForest/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Iris/Hastie.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Iris/Iris.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Iris/Iris2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Iris/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Iris/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCal500.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestCal500.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestEnron.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestEnron.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestImage.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestImage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestMediamill.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestMediamill.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestScene.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestScene.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestYeast.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestYeast.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learner/Layer.py" beforeDir="false" afterPath="$PROJECT_DIR$/learner/Layer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learner/MLKNN.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/learner/cascade.py" beforeDir="false" afterPath="$PROJECT_DIR$/learner/cascade.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learner/measure.py" beforeDir="false" afterPath="$PROJECT_DIR$/learner/measure.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learner/warpper.py" beforeDir="false" afterPath="$PROJECT_DIR$/learner/warpper.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="MIXED" />
+  </component>
+  <component name="ProjectId" id="1VxmHV3cfrBTBalX5978ChUNDva" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="ChangesTree.GroupingKeys" value="" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../AdaptiveRandomForest-master" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Pycharm2020.1.3\WorkSpace\MLDF" />
+      <recent name="D:\Pycharm2020.1.3\WorkSpace\MLDF\dataset" />
+      <recent name="D:\Pycharm2020.1.3\WorkSpace\MLDF\GCForest" />
+      <recent name="D:\Anaconda3-5.2.0\Lib\site-packages\keras\datasets" />
+      <recent name="D:\Pycharm2020.1.3\WorkSpace\MLDF\learner" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Pycharm2020.1.3\WorkSpace\MLDF\Iris" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.TestBirds">
+    <configuration name="TestBirds" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="MLDF" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TestBirds.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestCal500" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="MLDF" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TestCal500.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestCorel5K" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="MLDF" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TestCorel5K.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestMediamill" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="MLDF" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TestMediamill.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestMediamill5K" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="MLDF" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TestMediamill5K.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.TestBirds" />
+      <item itemvalue="Python.TestMediamill5K" />
+      <item itemvalue="Python.TestMediamill" />
+      <item itemvalue="Python.TestCorel5K" />
+      <item itemvalue="Python.TestCal500" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.TestBirds" />
+        <item itemvalue="Python.TestCal500" />
+        <item itemvalue="Python.TestCorel5K" />
+        <item itemvalue="Python.TestMediamill5K" />
+        <item itemvalue="Python.TestMediamill" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cec61da5-1ad3-41a4-a53f-070dcd1d1297" name="Default Changelist" comment="" />
+      <created>1578203032249</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578203032249</updated>
+      <workItem from="1578203035065" duration="11948000" />
+      <workItem from="1578287982920" duration="1194000" />
+      <workItem from="1603078983931" duration="5470000" />
+      <workItem from="1603240139718" duration="1218000" />
+      <workItem from="1603346337060" duration="1054000" />
+      <workItem from="1603594759566" duration="13000" />
+      <workItem from="1603679822180" duration="6530000" />
+      <workItem from="1603757869131" duration="4401000" />
+      <workItem from="1603769144309" duration="9317000" />
+      <workItem from="1603845000414" duration="8766000" />
+      <workItem from="1603931424709" duration="30452000" />
+      <workItem from="1604017177353" duration="20901000" />
+      <workItem from="1604193698963" duration="1166000" />
+      <workItem from="1604277031525" duration="6606000" />
+      <workItem from="1604316638634" duration="5000" />
+      <workItem from="1604451676998" duration="16724000" />
+      <workItem from="1604535612291" duration="16055000" />
+      <workItem from="1604622223325" duration="1490000" />
+      <workItem from="1604752027467" duration="1198000" />
+      <workItem from="1604801035142" duration="373000" />
+      <workItem from="1604830312501" duration="48394000" />
+      <workItem from="1605054672467" duration="20576000" />
+      <workItem from="1605148669697" duration="5216000" />
+      <workItem from="1605232738042" duration="17201000" />
+      <workItem from="1605419818457" duration="5165000" />
+      <workItem from="1605486689791" duration="13162000" />
+      <workItem from="1605843650162" duration="2679000" />
+      <workItem from="1605933499103" duration="11000" />
+      <workItem from="1606100685688" duration="1355000" />
+      <workItem from="1606122346895" duration="9138000" />
+      <workItem from="1606223936732" duration="1467000" />
+      <workItem from="1606264532322" duration="2583000" />
+      <workItem from="1606308081110" duration="887000" />
+      <workItem from="1606354474432" duration="1303000" />
+      <workItem from="1606438934366" duration="3338000" />
+      <workItem from="1606446957609" duration="281000" />
+      <workItem from="1606479530224" duration="972000" />
+      <workItem from="1606524340295" duration="1330000" />
+      <workItem from="1606872108891" duration="649000" />
+      <workItem from="1606878624055" duration="64000" />
+      <workItem from="1606911399411" duration="704000" />
+      <workItem from="1606956671245" duration="1595000" />
+      <workItem from="1607041281500" duration="3850000" />
+      <workItem from="1607130510787" duration="700000" />
+      <workItem from="1607303507420" duration="2440000" />
+      <workItem from="1607324278724" duration="38794000" />
+      <workItem from="1607476317904" duration="18000" />
+      <workItem from="1607477567655" duration="6625000" />
+      <workItem from="1607562349911" duration="5434000" />
+      <workItem from="1607649000168" duration="1950000" />
+      <workItem from="1607692671781" duration="1880000" />
+      <workItem from="1609209816510" duration="129000" />
+      <workItem from="1616977732410" duration="169000" />
+      <workItem from="1617068492406" duration="4527000" />
+      <workItem from="1617670430927" duration="3846000" />
+      <workItem from="1618300433328" duration="775000" />
+      <workItem from="1618489370006" duration="12834000" />
+      <workItem from="1618562502618" duration="7595000" />
+      <workItem from="1618641485140" duration="627000" />
+      <workItem from="1618642380001" duration="9531000" />
+      <workItem from="1618923485515" duration="1143000" />
+      <workItem from="1618924665898" duration="617000" />
+      <workItem from="1619051831129" duration="8397000" />
+      <workItem from="1619356660075" duration="1032000" />
+      <workItem from="1619357815848" duration="1522000" />
+      <workItem from="1619401048527" duration="679000" />
+      <workItem from="1620977899698" duration="46000" />
+      <workItem from="1621686213388" duration="74000" />
+      <workItem from="1621741397474" duration="646000" />
+      <workItem from="1621852854604" duration="1653000" />
+    </task>
+    <task id="LOCAL-00001" summary="首提">
+      <created>1604017508874</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1604017508874</updated>
+    </task>
+    <task id="LOCAL-00002" summary="datasets">
+      <created>1604017573816</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1604017573816</updated>
+    </task>
+    <task id="LOCAL-00003" summary="README.md">
+      <created>1604017725032</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1604017725032</updated>
+    </task>
+    <task id="LOCAL-00004" summary="README.md">
+      <created>1604018100160</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1604018100160</updated>
+    </task>
+    <task id="LOCAL-00005" summary="README.md">
+      <created>1604018760974</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1604018760974</updated>
+    </task>
+    <task id="LOCAL-00006" summary="二提">
+      <created>1604451707977</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1604451707977</updated>
+    </task>
+    <task id="LOCAL-00007" summary="二提">
+      <created>1604458958251</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1604458958251</updated>
+    </task>
+    <task id="LOCAL-00008" summary="1105">
+      <created>1604563957827</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1604563957827</updated>
+    </task>
+    <task id="LOCAL-00009" summary="test_CAL500数据集测试完成">
+      <created>1604886573930</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1604886573930</updated>
+    </task>
+    <task id="LOCAL-00010" summary="test_CAL500数据集测试完成">
+      <created>1604886716152</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1604886716152</updated>
+    </task>
+    <task id="LOCAL-00011" summary="yeast数据集测试完成">
+      <created>1604888347905</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1604888347905</updated>
+    </task>
+    <task id="LOCAL-00012" summary="scene、mediamill、enron数据集测试完成">
+      <created>1604891884729</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1604891884729</updated>
+    </task>
+    <task id="LOCAL-00013" summary="更新">
+      <created>1604893150061</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1604893150061</updated>
+    </task>
+    <task id="LOCAL-00014" summary="更新">
+      <created>1604909850752</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1604909850752</updated>
+    </task>
+    <task id="LOCAL-00015" summary="更新">
+      <created>1604917881348</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1604917881348</updated>
+    </task>
+    <task id="LOCAL-00016" summary="更新">
+      <created>1605011535507</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1605011535507</updated>
+    </task>
+    <task id="LOCAL-00017" summary="更新">
+      <created>1605082160519</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1605082160519</updated>
+    </task>
+    <task id="LOCAL-00018" summary="更新">
+      <created>1605176932102</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1605176932102</updated>
+    </task>
+    <task id="LOCAL-00019" summary="更新">
+      <created>1605359283997</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1605359283997</updated>
+    </task>
+    <task id="LOCAL-00020" summary="更新">
+      <created>1606308137672</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1606308137672</updated>
+    </task>
+    <task id="LOCAL-00021" summary="更新">
+      <created>1606479550436</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1606479550436</updated>
+    </task>
+    <task id="LOCAL-00022" summary="更新">
+      <created>1607393470282</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1607393470282</updated>
+    </task>
+    <task id="LOCAL-00023" summary="1209">
+      <created>1607477888360</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1607477888360</updated>
+    </task>
+    <task id="LOCAL-00024" summary="1209">
+      <created>1607478052439</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1607478052439</updated>
+    </task>
+    <task id="LOCAL-00025" summary="最新提交">
+      <created>1607483361532</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1607483361532</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="BEK_SORT_TYPE" value="1" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="首提" />
+    <MESSAGE value="datasets" />
+    <MESSAGE value="README.md" />
+    <MESSAGE value="二提" />
+    <MESSAGE value="1105" />
+    <MESSAGE value="test_CAL500数据集测试完成" />
+    <MESSAGE value="yeast数据集测试完成" />
+    <MESSAGE value="scene、mediamill、enron数据集测试完成" />
+    <MESSAGE value="更新" />
+    <MESSAGE value="1854" />
+    <MESSAGE value="1209" />
+    <MESSAGE value="最新提交" />
+    <option name="LAST_COMMIT_MESSAGE" value="最新提交" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="690" y="266" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1619052916758">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="690" y="266" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1619052916758" />
+    <state x="260" y="278" key="FileChooserDialogImpl" timestamp="1621858302078">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="260" y="278" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1621858302078" />
+    <state width="1877" height="382" key="GridCell.Tab.0.bottom" timestamp="1621858304568">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="382" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1621858304568" />
+    <state width="1877" height="382" key="GridCell.Tab.0.center" timestamp="1621858304568">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="382" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1621858304568" />
+    <state width="1877" height="382" key="GridCell.Tab.0.left" timestamp="1621858304568">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="382" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1621858304568" />
+    <state width="1877" height="382" key="GridCell.Tab.0.right" timestamp="1621858304568">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="382" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1621858304568" />
+    <state x="755" y="435" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1621858270620">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="755" y="435" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1621858270620" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/MLDF$Layer.coverage" NAME="Layer Coverage Results" MODIFIED="1603791029875" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learner" />
+    <SUITE FILE_PATH="coverage/MLDF$Hastie.coverage" NAME="Hastie Coverage Results" MODIFIED="1605164257430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Iris" />
+    <SUITE FILE_PATH="coverage/MLDF$TestImage__1_.coverage" NAME="TestImage (1) Coverage Results" MODIFIED="1604545196439" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$TestMediamill.coverage" NAME="TestMediamill Coverage Results" MODIFIED="1619356803542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$TestCorel5K.coverage" NAME="TestCorel5K Coverage Results" MODIFIED="1619357979615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$demo_mnist.coverage" NAME="demo_mnist Coverage Results" MODIFIED="1604548723781" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../../Anaconda3-5.2.0/Lib/site-packages/gcForest/examples" />
+    <SUITE FILE_PATH="coverage/MLDF$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1606447233079" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Iris" />
+    <SUITE FILE_PATH="coverage/MLDF$TestBirds.coverage" NAME="TestBirds Coverage Results" MODIFIED="1621858145013" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/code_release$deal.coverage" NAME="deal Coverage Results" MODIFIED="1578285637937" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$Iris2.coverage" NAME="Iris2 Coverage Results" MODIFIED="1605164786924" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Iris" />
+    <SUITE FILE_PATH="coverage/MLDF$TestMediamill5K.coverage" NAME="TestMediamill5K Coverage Results" MODIFIED="1619356824611" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$gcForest.coverage" NAME="gcForest Coverage Results" MODIFIED="1604832452888" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GCForest" />
+    <SUITE FILE_PATH="coverage/MLDF$cascade.coverage" NAME="cascade Coverage Results" MODIFIED="1603782499488" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learner" />
+    <SUITE FILE_PATH="coverage/MLDF$demo_mnist__1_.coverage" NAME="demo_mnist (1) Coverage Results" MODIFIED="1604560045427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../../Anaconda3-5.2.0/Lib/site-packages/gcforest/examples" />
+    <SUITE FILE_PATH="coverage/MLDF$testKFold.coverage" NAME="testKFold Coverage Results" MODIFIED="1604973261448" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/dataset" />
+    <SUITE FILE_PATH="coverage/MLDF$Iris.coverage" NAME="Iris Coverage Results" MODIFIED="1605163399591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learner" />
+    <SUITE FILE_PATH="coverage/MLDF$warpper.coverage" NAME="warpper Coverage Results" MODIFIED="1603790761129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learner" />
+    <SUITE FILE_PATH="coverage/MLDF$TestYeast.coverage" NAME="TestYeast Coverage Results" MODIFIED="1607484759731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/code_release$test.coverage" NAME="test Coverage Results" MODIFIED="1578289246040" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$MLKNN.coverage" NAME="MLKNN Coverage Results" MODIFIED="1607425589770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learner" />
+    <SUITE FILE_PATH="coverage/MLDF$TestScene.coverage" NAME="TestScene Coverage Results" MODIFIED="1618924166387" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$showData.coverage" NAME="showData Coverage Results" MODIFIED="1619052959414" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/dataset" />
+    <SUITE FILE_PATH="coverage/MLDF$TestEnron.coverage" NAME="TestEnron Coverage Results" MODIFIED="1605443689991" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$TestCal500.coverage" NAME="TestCal500 Coverage Results" MODIFIED="1621857979218" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$test_forest.coverage" NAME="test_forest Coverage Results" MODIFIED="1607350639291" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../../Anaconda3-5.2.0/Lib/site-packages/sklearn/ensemble/tests" />
+    <SUITE FILE_PATH="coverage/MLDF$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1603683038557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learner" />
+    <SUITE FILE_PATH="coverage/MLDF$test.coverage" NAME="test Coverage Results" MODIFIED="1606444061395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MLDF$testing.coverage" NAME="testing Coverage Results" MODIFIED="1603877078188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../../Anaconda3-5.2.0/envs/python36/Lib/site-packages/sklearn/utils" />
+    <SUITE FILE_PATH="coverage/MLDF$TestImage.coverage" NAME="TestImage Coverage Results" MODIFIED="1618924246625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
